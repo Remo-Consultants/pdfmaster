@@ -1,0 +1,47 @@
+# Bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and local app data
+*.log
+.pdfmaster/
+temp/
+tmp/
+*.tmp
+*.bak
+
+# Local secrets (none shipped, keep ignored)
+.env
+.env.*
+credentials.json
+
+# Generated PDFs from tests
+tests/artifacts/
