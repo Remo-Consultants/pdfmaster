@@ -16,6 +16,7 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import (
     QComboBox,
+    QDialog,
     QDockWidget,
     QFileDialog,
     QLabel,
@@ -67,14 +68,25 @@ from src.core.document import Document
 from src.core.history import DocumentHistory
 from src.core.pdf_handler import PDFHandler
 from src.ui.edit_controller import EditController
+from src.ui.dialogs.batch_dialog import BatchDialog
+from src.ui.dialogs.ocr_dialog import OCRDialog
+from src.ui.dialogs.search_dialog import SearchDialog
+from src.ui.dialogs.security_dialog import (
+    PasswordPromptDialog,
+    SecurityInfoDialog,
+    SetPasswordDialog,
+)
 from src.ui.icons import action_icon, clear_cache, swatch_icon, tool_icon
 from src.ui.theme import apply_theme, detect_scheme
 from src.ui.tools import PRIMARY_TOOLS, TOOL_HINTS, TOOL_LABELS, ToolMode
+from src.ui.widgets.bookmarks_panel import BookmarksPanel
 from src.ui.widgets.document_tabs import DocumentTab, DocumentTabs
 from src.ui.widgets.document_viewer import DocumentViewer
 from src.ui.widgets.info_panel import InfoPanel
 from src.ui.widgets.ribbon import Ribbon
+from src.ui.widgets.text_extract_panel import TextExtractPanel
 from src.ui.widgets.thumbnail_panel import ThumbnailPanel
+from src.services.security_service import SecurityService
 from src.utils.exceptions import (
     FileOperationError,
     PageOperationError,
@@ -383,6 +395,56 @@ class MainWindow(QMainWindow):
         self.last_action.triggered.connect(self.last_page)
         nav_menu.addAction(self.last_action)
 
+        # --- Tools menu additions ---
+        tools_menu = self.menuBar().findChild(QAction, "")
+        for action in self.menuBar().actions():
+            if action.text() == "&Tools":
+                tools_menu = action.menu()
+                break
+
+        if tools_menu:
+            tools_menu.addSeparator()
+            self.search_action = QAction("&Search Document...", self)
+            self.search_action.setShortcut(QKeySequence(SHORTCUTS["search"]))
+            self.search_action.setStatusTip("Search text across all pages")
+            self.search_action.triggered.connect(self.open_search_dialog)
+            tools_menu.addAction(self.search_action)
+
+            self.ocr_action = QAction("&OCR Scanned Pages...", self)
+            self.ocr_action.setShortcut(QKeySequence(SHORTCUTS["ocr"]))
+            self.ocr_action.setStatusTip("Extract text from scanned pages using OCR")
+            self.ocr_action.triggered.connect(self.open_ocr_dialog)
+            tools_menu.addAction(self.ocr_action)
+
+            self.extract_text_action = QAction("E&xtract Text...", self)
+            self.extract_text_action.setShortcut(QKeySequence(SHORTCUTS["extract_text"]))
+            self.extract_text_action.setStatusTip("Extract text from pages")
+            self.extract_text_action.triggered.connect(self.toggle_text_panel)
+            tools_menu.addAction(self.extract_text_action)
+
+            tools_menu.addSeparator()
+            self.batch_action = QAction("&Batch Processing...", self)
+            self.batch_action.setStatusTip("Process multiple PDF files in a folder")
+            self.batch_action.triggered.connect(self.open_batch_dialog)
+            tools_menu.addAction(self.batch_action)
+
+            tools_menu.addSeparator()
+            security_menu = tools_menu.addMenu("&Security")
+            self.security_info_action = QAction("Security &Info...", self)
+            self.security_info_action.setStatusTip("View document security settings")
+            self.security_info_action.triggered.connect(self.show_security_info)
+            security_menu.addAction(self.security_info_action)
+
+            self.set_password_action = QAction("Set &Password...", self)
+            self.set_password_action.setStatusTip("Add password protection to the document")
+            self.set_password_action.triggered.connect(self.set_document_password)
+            security_menu.addAction(self.set_password_action)
+
+            self.remove_password_action = QAction("&Remove Password...", self)
+            self.remove_password_action.setStatusTip("Remove password protection")
+            self.remove_password_action.triggered.connect(self.remove_document_password)
+            security_menu.addAction(self.remove_password_action)
+
         help_menu = menu_bar.addMenu("&Help")
         about_action = QAction("&About", self)
         about_action.triggered.connect(self.show_about)
@@ -666,7 +728,7 @@ class MainWindow(QMainWindow):
         self._icon_actions["panel"] = self.toggle_info_action
 
     def create_docks(self) -> None:
-        """Create the thumbnail sidebar and the properties panel."""
+        """Create the thumbnail sidebar, bookmarks, text extract, and properties panels."""
         self.thumbnails = ThumbnailPanel(self)
         self.thumbnails.page_selected.connect(self._on_thumbnail_selected)
         self._thumb_dock = QDockWidget("Pages", self)
@@ -678,6 +740,19 @@ class MainWindow(QMainWindow):
         )
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self._thumb_dock)
 
+        self.bookmarks_panel = BookmarksPanel(self)
+        self.bookmarks_panel.page_requested.connect(self._on_bookmark_selected)
+        self._bookmarks_dock = QDockWidget("Bookmarks", self)
+        self._bookmarks_dock.setObjectName("bookmarks_dock")
+        self._bookmarks_dock.setWidget(self.bookmarks_panel)
+        self._bookmarks_dock.setAllowedAreas(
+            Qt.DockWidgetArea.LeftDockWidgetArea
+            | Qt.DockWidgetArea.RightDockWidgetArea
+        )
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self._bookmarks_dock)
+        self.tabifyDockWidget(self._thumb_dock, self._bookmarks_dock)
+        self._thumb_dock.raise_()
+
         self.info_panel = InfoPanel(self)
         self.info_panel.delete_requested.connect(self._on_delete_annotation)
         self._info_dock = QDockWidget("Properties", self)
@@ -688,8 +763,18 @@ class MainWindow(QMainWindow):
             | Qt.DockWidgetArea.RightDockWidgetArea
         )
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._info_dock)
-        # The properties panel is useful but not needed to read a PDF.
         self._info_dock.hide()
+
+        self.text_extract_panel = TextExtractPanel(self)
+        self._text_extract_dock = QDockWidget("Text Extraction", self)
+        self._text_extract_dock.setObjectName("text_extract_dock")
+        self._text_extract_dock.setWidget(self.text_extract_panel)
+        self._text_extract_dock.setAllowedAreas(
+            Qt.DockWidgetArea.LeftDockWidgetArea
+            | Qt.DockWidgetArea.RightDockWidgetArea
+        )
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._text_extract_dock)
+        self._text_extract_dock.hide()
 
         self.toggle_thumbs_action.setChecked(True)
         self.toggle_info_action.setChecked(False)
@@ -702,6 +787,11 @@ class MainWindow(QMainWindow):
 
     def _on_thumbnail_selected(self, page: int) -> None:
         """Handle thumbnail click by navigating to that page."""
+        if self.viewer is not None:
+            self.viewer.go_to_page(page)
+
+    def _on_bookmark_selected(self, page: int) -> None:
+        """Handle bookmark click by navigating to that page."""
         if self.viewer is not None:
             self.viewer.go_to_page(page)
 
@@ -760,7 +850,9 @@ class MainWindow(QMainWindow):
         self._tabs.open_document(document)
         self._connect_current_tab()
         self.thumbnails.set_document(document)
+        self.bookmarks_panel.set_document(document)
         self.info_panel.set_document(document)
+        self.text_extract_panel.set_document(document)
         self.editor.reset()
         self.set_tool(ToolMode.PAN)
         self._set_document_actions_enabled(True)
@@ -863,7 +955,9 @@ class MainWindow(QMainWindow):
         if index < 0:
             # No tabs open.
             self.thumbnails.set_document(None)
+            self.bookmarks_panel.set_document(None)
             self.info_panel.set_document(None)
+            self.text_extract_panel.set_document(None)
             self._set_document_actions_enabled(False)
             self.setWindowTitle(APP_NAME)
             self.update_page_info(0)
@@ -873,7 +967,9 @@ class MainWindow(QMainWindow):
         doc = self.document
         if doc:
             self.thumbnails.set_document(doc)
+            self.bookmarks_panel.set_document(doc)
             self.info_panel.set_document(doc)
+            self.text_extract_panel.set_document(doc)
             self._set_document_actions_enabled(True)
             self.setWindowTitle(f"{doc.filename} — {APP_NAME}")
             self.update_page_info(self.viewer.current_page if self.viewer else 0)
@@ -994,6 +1090,7 @@ class MainWindow(QMainWindow):
             self._page_count_label.setText(f"/ {count}")
             self.thumbnails.set_current_page(current - 1)
             self.info_panel.refresh(current - 1)
+            self.text_extract_panel.set_current_page(current - 1)
         finally:
             self._updating_ui = False
 
@@ -1030,7 +1127,9 @@ class MainWindow(QMainWindow):
         # Drain thumbnail workers first.
         self.thumbnails.set_document(None)
         self.thumbnails.wait_for_render()
+        self.bookmarks_panel.set_document(None)
         self.info_panel.set_document(None)
+        self.text_extract_panel.set_document(None)
 
         # Close all tabs (will prompt for unsaved changes).
         if not self._tabs.close_all():
@@ -1124,3 +1223,100 @@ class MainWindow(QMainWindow):
         logger.error("%s: %s", title, message)
         self.statusBar().showMessage(message)
         QMessageBox.critical(self, title, message)
+
+    # ------------------------------------------------------------------
+    # Phase 3 features: Search, OCR, Batch, Security
+    # ------------------------------------------------------------------
+    def open_search_dialog(self) -> None:
+        """Open the document search dialog."""
+        if self.document is None:
+            self.statusBar().showMessage(MSG_NO_DOCUMENT)
+            return
+        dialog = SearchDialog(self.document, self)
+        dialog.go_to_page.connect(lambda page: self.viewer.go_to_page(page) if self.viewer else None)
+        dialog.show()
+
+    def open_ocr_dialog(self) -> None:
+        """Open the OCR dialog for scanned pages."""
+        if self.document is None:
+            self.statusBar().showMessage(MSG_NO_DOCUMENT)
+            return
+        current_page = self.viewer.current_page if self.viewer else 0
+        dialog = OCRDialog(self.document, current_page, self)
+        dialog.exec()
+
+    def open_batch_dialog(self) -> None:
+        """Open the batch processing dialog."""
+        dialog = BatchDialog(self)
+        dialog.exec()
+
+    def toggle_text_panel(self) -> None:
+        """Toggle the text extraction panel visibility."""
+        if self._text_extract_dock.isVisible():
+            self._text_extract_dock.hide()
+        else:
+            self._text_extract_dock.show()
+            if self.document and self.viewer:
+                self.text_extract_panel.set_current_page(self.viewer.current_page)
+
+    def show_security_info(self) -> None:
+        """Show security information about the current document."""
+        if self.document is None:
+            self.statusBar().showMessage(MSG_NO_DOCUMENT)
+            return
+        dialog = SecurityInfoDialog(self.document, self)
+        dialog.exec()
+
+    def set_document_password(self) -> None:
+        """Set password protection on the current document."""
+        if self.document is None:
+            self.statusBar().showMessage(MSG_NO_DOCUMENT)
+            return
+
+        dialog = SetPasswordDialog(self.document, self)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+
+        settings = dialog.get_settings()
+        suggested = str(FileHandler.get_output_path(self.document.file_path, "_protected"))
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Save Protected PDF", suggested, PDF_FILTER
+        )
+        if not path:
+            return
+
+        try:
+            from pathlib import Path
+            output = Path(path)
+            SecurityService.set_password(
+                self.document,
+                output,
+                user_password=settings["user_password"],
+                owner_password=settings["owner_password"],
+                permissions=settings["permissions"],
+                encryption=settings["encryption"],
+            )
+            self.statusBar().showMessage(f"Password protection saved to {output.name}")
+        except Exception as exc:
+            self._show_error("Password Error", str(exc))
+
+    def remove_document_password(self) -> None:
+        """Remove password protection from the current document."""
+        if self.document is None:
+            self.statusBar().showMessage(MSG_NO_DOCUMENT)
+            return
+
+        suggested = str(FileHandler.get_output_path(self.document.file_path, "_decrypted"))
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Save Decrypted PDF", suggested, PDF_FILTER
+        )
+        if not path:
+            return
+
+        try:
+            from pathlib import Path
+            output = Path(path)
+            SecurityService.remove_password(self.document, output)
+            self.statusBar().showMessage(f"Decrypted PDF saved to {output.name}")
+        except Exception as exc:
+            self._show_error("Decryption Error", str(exc))

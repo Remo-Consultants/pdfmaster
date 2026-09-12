@@ -6,7 +6,7 @@ from pathlib import Path
 # Application identity
 # ---------------------------------------------------------------------------
 APP_NAME = "PDFMaster"
-APP_VERSION = "0.4.0"
+APP_VERSION = "0.5.0"
 APP_AUTHOR = "PDFMaster Contributors"
 APP_DESCRIPTION = "A professional PDF viewer and editor for Windows"
 APP_LICENSE = "MIT"
@@ -91,6 +91,11 @@ SHORTCUTS = {
     "rotate_ccw": "Ctrl+Shift+R",
     "fit_width": "Ctrl+1",
     "fit_page": "Ctrl+2",
+    "search": "Ctrl+F",
+    "ocr": "Ctrl+Shift+T",
+    "extract_text": "Ctrl+T",
+    "toggle_bookmarks": "F11",
+    "toggle_text_panel": "F12",
 }
 
 # ---------------------------------------------------------------------------
@@ -209,3 +214,11 @@ MSG_NOTHING_TO_UNDO = "Nothing to undo"
 MSG_NOTHING_TO_REDO = "Nothing to redo"
 MSG_UNDONE = "Undo applied"
 MSG_REDONE = "Redo applied"
+MSG_SEARCH_NO_RESULTS = "No results found for '{query}'"
+MSG_SEARCH_FOUND = "Found {count} result(s) for '{query}'"
+MSG_OCR_COMPLETE = "OCR complete: {chars} characters extracted"
+MSG_OCR_NOT_AVAILABLE = "OCR is not available. Install tesseract-ocr or easyocr."
+MSG_TEXT_EXTRACTED = "Extracted {chars} characters from {pages} page(s)"
+MSG_PASSWORD_SET = "Password protection applied"
+MSG_PASSWORD_REMOVED = "Password protection removed"
+MSG_BATCH_COMPLETE = "Batch operation complete: {success}/{total} files processed"

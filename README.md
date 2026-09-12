@@ -968,19 +968,57 @@ Suggested branch naming: `fix/save-overwrite`, `feat/thumbnails`.
 - Image export (PNG, JPEG) at selectable dpi
 - Undo and redo
 
-### Phase 3 (ideas)
+### Phase 3 (shipped in 0.5.0)
 
 - Text extraction panel and copy-to-clipboard
-- OCR for scanned pages
-- Password set / remove and digital signatures
+- OCR for scanned pages (tesseract and easyocr backends)
+- Password set / remove with AES-256 encryption
 - Batch folder processing and compression presets
 - Bookmarks / outline in the sidebar
 - Document-wide search
-- Installer / Start Menu shortcut
+- Installer / Start Menu shortcut (PyInstaller + NSIS)
+
+### Phase 4 (ideas)
+
+- Digital signatures with certificate support
+- Cloud storage integration (OneDrive, Google Drive, Dropbox)
+- PDF/A compliance validation and conversion
+- Watermarks and stamps
+- Document comparison / diff view
+- Advanced OCR with PDF/A output
+- Multi-language spell check
+- Accessibility features (screen reader support)
 
 ---
 
 ## Changelog
+
+### 0.5.0 — 2026-09-12
+
+Phase 3: search, OCR, security, and batch processing.
+
+- **Added:** Document-wide search (`Ctrl+F`) with case-insensitive and
+  whole-word matching, result navigation, and context preview.
+- **Added:** OCR support for scanned pages using tesseract or easyocr.
+  Extracts text from images with configurable language and DPI settings.
+- **Added:** Text extraction panel (`F12`) with page range selection and
+  copy-to-clipboard functionality.
+- **Added:** Bookmarks/outline panel showing the document's table of
+  contents as a clickable tree for navigation.
+- **Added:** Password protection — set user/owner passwords with
+  configurable permissions (print, copy, modify, annotate) and AES-256
+  encryption, or remove existing passwords.
+- **Added:** Security info dialog showing encryption status and current
+  permissions.
+- **Added:** Batch processing dialog for folder-wide operations:
+  compress PDFs with presets (screen/ebook/printer/prepress), extract
+  text to TXT files, or convert pages to images.
+- **Added:** Compression presets with configurable image quality, DPI,
+  and garbage collection settings.
+- **Added:** PyInstaller spec file and NSIS installer script for
+  creating Windows distributions with Start Menu shortcuts.
+- **Changed:** Package version bumped to 0.5.0.
+- **Tests:** 238 → 259 tests, 85% → 86% coverage.
 
 ### 0.4.0 — 2026-09-12
 
