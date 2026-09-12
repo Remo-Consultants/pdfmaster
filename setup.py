@@ -14,7 +14,7 @@ REQUIREMENTS = [
 
 setup(
     name="pdfmaster",
-    version="0.4.0",
+    version="0.5.0",
     description="A professional PDF viewer and editor for Windows",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -24,6 +24,12 @@ setup(
     packages=find_packages(include=["src", "src.*"]),
     include_package_data=True,
     install_requires=REQUIREMENTS,
+    extras_require={
+        "ocr": ["pytesseract>=0.3.10"],
+        "ocr-easyocr": ["easyocr>=1.7.0"],
+        "installer": ["pyinstaller>=6.0.0"],
+        "all": ["pytesseract>=0.3.10", "pyinstaller>=6.0.0"],
+    },
     entry_points={
         "console_scripts": [
             "pdfmaster=src.main:main",
