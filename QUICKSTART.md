@@ -116,23 +116,40 @@ A window titled **PDFMaster** should open. If it does not, read
 5. Drag the zoom slider, or hold **Ctrl** and scroll
 6. Click **Fit Width**, then **Fit Page**
 7. Try **View → Rotate Clockwise**
-8. If you rotated a page you care about, press **Ctrl+S** to save
-9. Close the window with **Ctrl+Q**
+8. Press **Ctrl+F** to search the whole document
+9. Open the **Bookmarks** tab on the left (next to thumbnails) if the
+   PDF has an outline
+10. Press **Ctrl+T** for the text extraction panel; copy what you need
+11. If you rotated a page you care about, press **Ctrl+S** to save
+12. Close the window with **Ctrl+Q**
 
-That is the reading loop: open, scroll, zoom, rotate or delete, save.
+That is the reading loop: open, scroll, zoom, search or extract, rotate
+or delete, save.
 
 ### The window
 
 - **Ribbon** — Home / Markup / Edit / Organize / View tabs with labelled
   groups (File, Zoom, Text Markup, …)
 - **Document tabs** — one tab per open PDF; close a tab with its ×
-- **Left sidebar** — a thumbnail per page. Press **F9** to hide it.
-- **Right panel** — document details and the markup on the current page.
-  Hidden until you press **F10**.
+- **Left sidebar** — thumbnails (**F9**) and a **Bookmarks** tab for
+  the document outline
+- **Right panel** — document details and the markup on the current page
+  (**F10**), plus text extraction (**Ctrl+T**)
 - **Status bar** — what just happened, and what the current tool expects
 
 Hover any ribbon button for its name and shortcut. PDFMaster follows the
 Windows light or dark setting, and changes with it straight away.
+
+### Search, OCR, security, and batch (0.5.0)
+
+These live under the **Tools** menu:
+
+- **Ctrl+F** — Search Document (case / whole-word options, jump to hits)
+- **Ctrl+Shift+T** — OCR Scanned Pages (needs tesseract or easyocr)
+- **Ctrl+T** — Extract Text panel (page, range, or all pages → clipboard)
+- **Batch Processing** — compress / extract / convert a folder of PDFs
+- **Security Info** / **Set Password** / **Remove Password** — view
+  encryption status or write a protected / decrypted copy
 
 ---
 
@@ -270,9 +287,11 @@ PySide6 install. Re-run `pip install --force-reinstall PySide6`.
 The file is not a real PDF (for example a `.pdf` that is actually
 HTML). Open it in Notepad: the first characters must be `%PDF-`.
 
-### Password dialog never appears
+### Encrypted PDF will not open
 
-The MVP cannot open encrypted PDFs. Use an unencrypted copy.
+Opening a password-protected file still needs the password at load time.
+To protect an open file yourself, use **Tools → Set Password** and save
+a protected copy. **Tools → Security Info** shows encryption status.
 
 ### Changes disappeared after close
 

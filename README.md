@@ -1001,7 +1001,7 @@ Phase 3: search, OCR, security, and batch processing.
   whole-word matching, result navigation, and context preview.
 - **Added:** OCR support for scanned pages using tesseract or easyocr.
   Extracts text from images with configurable language and DPI settings.
-- **Added:** Text extraction panel (`F12`) with page range selection and
+- **Added:** Text extraction panel (`Ctrl+T`) with page range selection and
   copy-to-clipboard functionality.
 - **Added:** Bookmarks/outline panel showing the document's table of
   contents as a clickable tree for navigation.
