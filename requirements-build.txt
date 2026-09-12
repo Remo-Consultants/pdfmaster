@@ -1,0 +1,2 @@
+# Packaging-only dependencies (not needed to run from source)
+pyinstaller>=6.3.0

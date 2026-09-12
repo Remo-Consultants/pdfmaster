@@ -1,23 +1,40 @@
 # PDFMaster Quick Start
 
-Get PDFMaster running in about five minutes. This guide assumes you
-have never used Python virtual environments before. If you already have
-the app installed, skip to [First steps](#first-steps).
+Get PDFMaster running in about five minutes.
+
+**Prefer a Windows installer?** See [`INSTALL.md`](INSTALL.md) — download
+`PDFMaster-0.5.0-Setup.exe` or the portable ZIP from
+[Releases](https://github.com/Remo-Consultants/pdfmaster/releases/latest),
+then skip to [First steps](#first-steps).
+
+**Styled overview:** open [`docs/index.html`](docs/index.html) in your browser.
+
+This page covers the **from-source** path for developers. If you already
+have the app installed, skip to [First steps](#first-steps).
 
 ---
 
 ## What you need
 
-- A Windows 10/11 PC (Windows 7 may work if Python 3.10 installs)
-- An internet connection for the first `pip install`
+- A Windows 10/11 PC
+- Either the release installer/ZIP, **or** Python 3.10+ for source installs
 - A sample PDF to open (any normal, non-password file)
 
-Linux and macOS users can follow the same steps. Replace
+Linux and macOS users can follow the source steps. Replace
 `venv\Scripts\activate` with `source venv/bin/activate`.
 
 ---
 
-## Step 1 — Install Python
+## Fastest path — release build
+
+1. Open https://github.com/Remo-Consultants/pdfmaster/releases/latest  
+2. Download **Setup.exe** (recommended) or **win64.zip**  
+3. Install or extract, launch **PDFMaster**  
+4. Continue at [First steps](#first-steps)
+
+---
+
+## Step 1 — Install Python (source only)
 
 1. Open https://www.python.org/downloads/
 2. Download Python 3.10 or newer
@@ -47,11 +64,13 @@ and use `py -3` everywhere this guide says `python`.
 In PowerShell:
 
 ```powershell
-cd "C:\Users\dines\OneDrive\Documents\Dinesh_App\Dinesh_PDF\pdfmaster_project"
+cd pdfmaster
 ```
 
+(Or clone first: `git clone https://github.com/Remo-Consultants/pdfmaster.git`)
+
 If you cloned or copied the project elsewhere, `cd` to that
-`pdfmaster_project` directory instead. You should see `src`,
+`pdfmaster` directory instead. You should see `src`,
 `requirements.txt`, and `README.md` when you run `dir`.
 
 ---
@@ -274,7 +293,7 @@ system Python. Activate the venv and try again. Do not use
 
 ### `No module named src`
 
-You are not in `pdfmaster_project`. `cd` there, then
+You are not in the repo root. `cd` there, then
 `python -m src.main`.
 
 ### Window opens then closes

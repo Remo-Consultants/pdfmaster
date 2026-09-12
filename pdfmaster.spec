@@ -21,9 +21,8 @@ a = Analysis(
     pathex=[str(ROOT)],
     binaries=[],
     datas=[
-        # Include icons
         (str(ROOT / 'resources' / 'icons'), 'resources/icons'),
-    ],
+    ] if (ROOT / 'resources' / 'icons').is_dir() else [],
     hiddenimports=[
         'PySide6.QtCore',
         'PySide6.QtGui',
@@ -33,20 +32,19 @@ a = Analysis(
         'pypdf',
         'PIL',
         'PIL.Image',
-        # OCR backends (optional)
-        'pytesseract',
-        'easyocr',
     ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[
-        # Exclude unused Qt modules to reduce size
         'PySide6.QtNetwork',
         'PySide6.QtQml',
         'PySide6.QtQuick',
         'PySide6.QtWebEngine',
         'PySide6.QtMultimedia',
+        'tkinter',
+        'matplotlib',
+        'numpy.tests',
     ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,

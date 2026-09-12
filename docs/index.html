@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDFMaster — Desktop PDF viewer &amp; editor</title>
+  <meta name="description" content="PDFMaster is a professional Windows PDF viewer and editor. Files stay on your PC. Ribbon workspace, markup, security, and batch tools." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0f172a;
+      --slate: #334155;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --paper: #f8fafc;
+      --white: #ffffff;
+      --teal: #0f766e;
+      --teal-deep: #115e59;
+      --teal-soft: #ccfbf1;
+      --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+      --max: 1080px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #d1fae5 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #e0f2fe 0%, transparent 50%),
+        linear-gradient(180deg, #f1f5f9 0%, var(--paper) 28%, var(--white) 100%);
+      font-family: "DM Sans", system-ui, sans-serif;
+      line-height: 1.55;
+    }
+
+    a { color: var(--teal-deep); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { color: var(--teal); }
+
+    .wrap { width: min(var(--max), calc(100% - 2.5rem)); margin-inline: auto; }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 0;
+      gap: 1rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .brand img { width: 36px; height: 36px; }
+    .nav-links { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 0.95rem; }
+    .nav-links a { color: var(--slate); text-decoration: none; font-weight: 500; }
+    .nav-links a:hover { color: var(--teal); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 2.5rem;
+      align-items: center;
+      padding: 2.5rem 0 3.5rem;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal-deep);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    h1 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-weight: 400;
+      font-size: clamp(2.6rem, 5vw, 4rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin: 1rem 0 1rem;
+    }
+    .lede {
+      font-size: 1.15rem;
+      color: var(--slate);
+      max-width: 36rem;
+      margin: 0 0 1.75rem;
+    }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.25rem;
+      border-radius: 999px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary {
+      background: var(--ink);
+      color: white;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+    }
+    .btn-primary:hover { background: #1e293b; color: white; }
+    .btn-secondary {
+      background: white;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    .stage {
+      position: relative;
+      min-height: 340px;
+      border-radius: calc(var(--radius) + 6px);
+      background: linear-gradient(160deg, #0f172a 0%, #1e293b 55%, #115e59 120%);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      padding: 1.5rem;
+    }
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: auto -20% -30% 20%;
+      height: 70%;
+      background: radial-gradient(circle, rgba(45, 212, 191, 0.35), transparent 65%);
+      pointer-events: none;
+    }
+    .window {
+      position: relative;
+      background: #f8fafc;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      animation: rise 0.8s ease both;
+    }
+    .titlebar {
+      display: flex;
+      gap: 6px;
+      padding: 0.65rem 0.8rem;
+      background: #e2e8f0;
+    }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; }
+    .ribbon {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.35rem;
+      padding: 0.6rem;
+      background: white;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    .ribbon span {
+      padding: 0.45rem 0.2rem;
+      border-radius: 8px;
+      background: #f1f5f9;
+    }
+    .ribbon span.active { background: var(--teal-soft); color: var(--teal-deep); font-weight: 600; }
+    .canvas {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      min-height: 210px;
+      background: #cbd5e1;
+    }
+    .thumbs { padding: 0.6rem; display: grid; gap: 0.4rem; background: #e2e8f0; }
+    .thumb {
+      height: 42px;
+      border-radius: 4px;
+      background: white;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.08);
+    }
+    .pages {
+      padding: 1rem;
+      display: grid;
+      gap: 0.75rem;
+      justify-items: center;
+    }
+    .page {
+      width: min(78%, 220px);
+      aspect-ratio: 8.5 / 11;
+      background: white;
+      border-radius: 2px;
+      box-shadow:
+        0 1px 0 rgba(15,23,42,0.04),
+        0 8px 16px rgba(15,23,42,0.12),
+        0 18px 36px rgba(15,23,42,0.08);
+      padding: 12% 10%;
+    }
+    .page .line {
+      height: 6px;
+      border-radius: 99px;
+      background: #e2e8f0;
+      margin-bottom: 8px;
+    }
+    .page .line.short { width: 55%; }
+    .page .mark {
+      height: 14px;
+      width: 70%;
+      border-radius: 3px;
+      background: rgba(250, 204, 21, 0.45);
+      margin: 10px 0;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px) scale(0.98); }
+      to { opacity: 1; transform: none; }
+    }
+
+    section { padding: 3rem 0; }
+    .section-head {
+      max-width: 40rem;
+      margin-bottom: 1.75rem;
+    }
+    .section-head h2 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.6rem;
+    }
+    .section-head p { margin: 0; color: var(--slate); }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.35rem;
+      box-shadow: 0 1px 0 rgba(15,23,42,0.02);
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    .card:hover { border-color: #99f6e4; transform: translateY(-2px); }
+    .card h3 { margin: 0 0 0.45rem; font-size: 1.05rem; }
+    .card p { margin: 0; color: var(--slate); font-size: 0.95rem; }
+    .card .kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 0.55rem;
+    }
+
+    .install {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .install-panel {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .install-panel.featured {
+      border-color: #5eead4;
+      background: linear-gradient(180deg, #f0fdfa 0%, white 45%);
+    }
+    .install-panel h3 { margin-top: 0; }
+    .steps { margin: 0; padding-left: 1.1rem; color: var(--slate); }
+    .steps li { margin: 0.45rem 0; }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+
+    .arch {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+    .layers {
+      display: grid;
+      gap: 0.75rem;
+      min-width: 520px;
+    }
+    .layer {
+      border-radius: 14px;
+      padding: 1rem 1.15rem;
+      border: 1px solid var(--line);
+    }
+    .layer.ui { background: #ecfeff; border-color: #a5f3fc; }
+    .layer.services { background: #f0fdfa; border-color: #99f6e4; }
+    .layer.core { background: #eff6ff; border-color: #bfdbfe; }
+    .layer.utils { background: #f8fafc; }
+    .layer strong { display: block; margin-bottom: 0.25rem; }
+    .layer span { color: var(--slate); font-size: 0.92rem; }
+
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: white; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    th, td { text-align: left; padding: 0.85rem 1rem; border-bottom: 1px solid var(--line); }
+    th { background: #f8fafc; color: var(--slate); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    tr:last-child td { border-bottom: 0; }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 2rem 0 3rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    footer .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    @media (max-width: 860px) {
+      .hero, .install, .grid-3 { grid-template-columns: 1fr; }
+      .stage { min-height: 280px; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="nav" aria-label="Primary">
+      <a class="brand" href="#top">
+        <img src="../resources/icons/pdfmaster.png" alt="" width="36" height="36" />
+        PDFMaster
+      </a>
+      <div class="nav-links">
+        <a href="#install">Install</a>
+        <a href="#features">Features</a>
+        <a href="#architecture">Architecture</a>
+        <a href="https://github.com/Remo-Consultants/pdfmaster">GitHub</a>
+      </div>
+    </nav>
+
+    <header class="hero" id="top">
+      <div>
+        <div class="eyebrow">Windows · v0.5.0 · Offline-first</div>
+        <h1>Read, mark up, and ship PDFs without leaving your desk.</h1>
+        <p class="lede">
+          PDFMaster is a native desktop viewer and editor with a commercial ribbon workspace,
+          multi-document tabs, and tools for search, OCR, security, and batch work.
+          Your files stay on your machine.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://github.com/Remo-Consultants/pdfmaster/releases/latest">Download release</a>
+          <a class="btn btn-secondary" href="#install">Install options</a>
+        </div>
+      </div>
+      <div class="stage" aria-hidden="true">
+        <div class="window">
+          <div class="titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="ribbon">
+            <span class="active">Home</span><span>Markup</span><span>Edit</span><span>Organize</span><span>View</span>
+          </div>
+          <div class="canvas">
+            <div class="thumbs"><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div></div>
+            <div class="pages">
+              <div class="page">
+                <div class="line"></div><div class="line"></div><div class="mark"></div>
+                <div class="line short"></div><div class="line"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section id="install">
+      <div class="section-head">
+        <h2>Install and work in minutes</h2>
+        <p>Pick the path that matches how you ship software on Windows. All paths open the same application.</p>
+      </div>
+      <div class="install">
+        <article class="install-panel featured">
+          <h3>1 · Setup.exe (recommended)</h3>
+          <ol class="steps">
+            <li>Open the <a href="https://github.com/Remo-Consultants/pdfmaster/releases/latest">latest GitHub release</a></li>
+            <li>Download <code>PDFMaster-0.5.0-Setup.exe</code></li>
+            <li>Run the installer (Start Menu + desktop shortcut)</li>
+            <li>Launch <strong>PDFMaster</strong> and press <kbd>Ctrl</kbd>+<kbd>O</kbd></li>
+          </ol>
+        </article>
+        <article class="install-panel">
+          <h3>2 · Portable ZIP</h3>
+          <ol class="steps">
+            <li>Download <code>PDFMaster-0.5.0-win64.zip</code></li>
+            <li>Extract anywhere (USB / local folder)</li>
+            <li>Run <code>PDFMaster.exe</code> — no install required</li>
+          </ol>
+        </article>
+        <article class="install-panel">
+          <h3>3 · From source (developers)</h3>
+<pre><code>git clone https://github.com/Remo-Consultants/pdfmaster.git
+cd pdfmaster
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python -m src.main</code></pre>
+        </article>
+        <article class="install-panel">
+          <h3>Build the installer yourself</h3>
+<pre><code>pip install pyinstaller
+python installer/build_installer.py --clean --nsis</code></pre>
+          <p style="color:var(--slate);margin:0.75rem 0 0;font-size:0.95rem;">
+            Needs <a href="https://nsis.sourceforge.io/">NSIS</a> for Setup.exe. Outputs land in <code>dist/</code>.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="section-head">
+        <h2>Designed for real PDF work</h2>
+        <p>One composition: ribbon, document tabs, continuous pages, and focused docks.</p>
+      </div>
+      <div class="grid-3">
+        <article class="card"><div class="kicker">Workspace</div><h3>Ribbon + tabs</h3><p>Home, Markup, Edit, Organize, View. Open several PDFs; each tab keeps zoom, page, and undo history.</p></article>
+        <article class="card"><div class="kicker">Markup</div><h3>Highlight to redact</h3><p>Text markup, notes, pen, shapes, find/replace, forms, flatten, and true redaction — with undo.</p></article>
+        <article class="card"><div class="kicker">Phase 3</div><h3>Search · OCR · Secure</h3><p>Document search, OCR backends, bookmarks, text extract, AES password protection, and folder batch jobs.</p></article>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <div class="section-head">
+        <h2>Architecture at a glance</h2>
+        <p>UI never talks to PyMuPDF directly. <code>Document</code> owns the open handle; processors and services mutate under lock.</p>
+      </div>
+      <div class="arch">
+        <div class="layers">
+          <div class="layer ui"><strong>UI — PySide6</strong><span>MainWindow · Ribbon · DocumentTabs · DocumentViewer · docks · dialogs · EditController</span></div>
+          <div class="layer services"><strong>Services &amp; processors</strong><span>Annotations · content · page ops · print/export · OCR · security · batch · history</span></div>
+          <div class="layer core"><strong>Core</strong><span>Document (locked fitz handle) · PDFHandler · render workers + cache</span></div>
+          <div class="layer utils"><strong>Foundation</strong><span>FileHandler · exceptions · logger · theme · HiDPI SVG icons · constants</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Everyday shortcuts</h2>
+        <p>Full list lives in the repository README. These get you productive immediately.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Action</th><th>Shortcut</th></tr></thead>
+          <tbody>
+            <tr><td>Open / Save</td><td><code>Ctrl+O</code> / <code>Ctrl+S</code></td></tr>
+            <tr><td>Search document</td><td><code>Ctrl+F</code></td></tr>
+            <tr><td>Extract text panel</td><td><code>Ctrl+T</code></td></tr>
+            <tr><td>OCR scanned pages</td><td><code>Ctrl+Shift+T</code></td></tr>
+            <tr><td>Thumbnails / Properties</td><td><code>F9</code> / <code>F10</code></td></tr>
+            <tr><td>Undo / Redo</td><td><code>Ctrl+Z</code> / <code>Ctrl+Y</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      <div class="row">
+        <div>PDFMaster 0.5.0 · MIT License · <a href="https://github.com/Remo-Consultants/pdfmaster">Remo-Consultants/pdfmaster</a></div>
+        <div><a href="../README.md">Full README</a> · <a href="../QUICKSTART.md">Quick start</a></div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

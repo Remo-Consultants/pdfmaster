@@ -4,7 +4,7 @@
 !define APP_NAME "PDFMaster"
 !define APP_VERSION "0.5.0"
 !define APP_PUBLISHER "PDFMaster Contributors"
-!define APP_URL "https://github.com/pdfmaster/pdfmaster"
+!define APP_URL "https://github.com/Remo-Consultants/pdfmaster"
 !define APP_EXE "PDFMaster.exe"
 
 ; Installer attributes
