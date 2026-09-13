@@ -429,6 +429,17 @@ class MainWindow(QMainWindow):
             tools_menu.addAction(self.batch_action)
 
             tools_menu.addSeparator()
+            self.watermark_action = QAction("&Watermark...", self)
+            self.watermark_action.setStatusTip("Add a text watermark across pages")
+            self.watermark_action.triggered.connect(lambda: self.editor.add_watermark())
+            tools_menu.addAction(self.watermark_action)
+
+            self.stamp_action = QAction("S&tamp...", self)
+            self.stamp_action.setStatusTip("Add a text or image stamp on this page")
+            self.stamp_action.triggered.connect(lambda: self.editor.add_stamp())
+            tools_menu.addAction(self.stamp_action)
+
+            tools_menu.addSeparator()
             security_menu = tools_menu.addMenu("&Security")
             self.security_info_action = QAction("Security &Info...", self)
             self.security_info_action.setStatusTip("View document security settings")
@@ -654,6 +665,12 @@ class MainWindow(QMainWindow):
         notes_grp.add_action(
             self._tool_actions[ToolMode.DELETE_ANNOT], large=True, label="Delete"
         )
+
+        stamp_grp = markup.add_group("Stamp")
+        if hasattr(self, "watermark_action"):
+            stamp_grp.add_action(self.watermark_action, large=True, label="Watermark")
+        if hasattr(self, "stamp_action"):
+            stamp_grp.add_action(self.stamp_action, large=True, label="Stamp")
 
         color_grp = markup.add_group("Color")
         self._color_box = QComboBox()
@@ -1197,6 +1214,8 @@ class MainWindow(QMainWindow):
             self.clear_markup_action,
             self.flatten_action,
             self.delete_action,
+            getattr(self, "watermark_action", None),
+            getattr(self, "stamp_action", None),
             self.fit_width_action,
             self.fit_page_action,
             self.zoom_in_action,
@@ -1209,7 +1228,8 @@ class MainWindow(QMainWindow):
             self.first_action,
             self.last_action,
         ):
-            action.setEnabled(enabled)
+            if action is not None:
+                action.setEnabled(enabled)
         for action in self._tool_actions.values():
             action.setEnabled(enabled)
         for widget in (

@@ -17,6 +17,7 @@ from src.ui.dialogs.text_dialogs import (
     ReplaceTextDialog,
     StickyNoteDialog,
 )
+from src.ui.dialogs.watermark_dialog import StampDialog, WatermarkDialog
 
 __all__ = [
     "AddTextDialog",
@@ -31,6 +32,8 @@ __all__ = [
     "SearchDialog",
     "SecurityInfoDialog",
     "SetPasswordDialog",
+    "StampDialog",
     "StickyNoteDialog",
+    "WatermarkDialog",
     "parse_page_range",
 ]

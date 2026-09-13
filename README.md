@@ -1,11 +1,11 @@
 # PDFMaster
 
-**Professional PDF viewer & editor for Windows — v0.5.0**
+**Professional PDF viewer & editor for Windows — v0.6.0**
 
 [![Release](https://img.shields.io/github/v/release/Remo-Consultants/pdfmaster?label=release)](https://github.com/Remo-Consultants/pdfmaster/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0f766e)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-0f172a)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-259%20passed-115e59)](tests/)
+[![CI](https://github.com/Remo-Consultants/pdfmaster/actions/workflows/ci.yml/badge.svg)](https://github.com/Remo-Consultants/pdfmaster/actions/workflows/ci.yml)
 
 Offline-first desktop app for opening, reading, annotating, editing, securing, and batch-processing PDFs. Files never leave your machine.
 
@@ -18,13 +18,13 @@ Offline-first desktop app for opening, reading, annotating, editing, securing, a
 ### Option A — Windows Setup.exe (recommended)
 
 1. Open the [latest release](https://github.com/Remo-Consultants/pdfmaster/releases/latest)
-2. Download **`PDFMaster-0.5.0-Setup.exe`**
+2. Download **`PDFMaster-*-Setup.exe`** from the latest release
 3. Run the installer → Start Menu / desktop shortcut
 4. Launch **PDFMaster** → **Ctrl+O** to open a PDF
 
 ### Option B — Portable ZIP
 
-1. Download **`PDFMaster-0.5.0-win64.zip`** from the same release
+1. Download **`PDFMaster-*-win64.zip`** from the same release
 2. Extract anywhere and run **`PDFMaster.exe`**
 3. No admin install required
 
@@ -56,8 +56,8 @@ Outputs in `dist/`:
 | Artifact | Purpose |
 | --- | --- |
 | `dist/PDFMaster/` | Folder distribution (`PDFMaster.exe`) |
-| `dist/PDFMaster-0.5.0-win64.zip` | Portable ZIP |
-| `dist/PDFMaster-0.5.0-Setup.exe` | NSIS installer (Start Menu + uninstall) |
+| `dist/PDFMaster-<version>-win64.zip` | Portable ZIP |
+| `dist/PDFMaster-<version>-Setup.exe` | NSIS installer (Start Menu + uninstall) |
 
 Full packaging notes: [`INSTALL.md`](INSTALL.md).
 
@@ -69,12 +69,13 @@ Full packaging notes: [`INSTALL.md`](INSTALL.md).
 | --- | --- |
 | **Workspace** | Ribbon (Home / Markup / Edit / Organize / View), multi-document tabs, continuous soft-shadow pages, system light/dark theme, HiDPI SVG icons |
 | **View** | Zoom 25–400%, fit width/page, thumbnails (`F9`), bookmarks outline, properties (`F10`) |
-| **Markup** | Highlight, underline, strikeout, squiggly, sticky notes, pen, rectangles, eight colours |
+| **Markup** | Highlight, underline, strikeout, squiggly, sticky notes, pen, rectangles, eight colours, watermarks & stamps |
 | **Edit** | Edit/replace text, add text/images, erase, find/replace, forms, true redaction, flatten |
 | **Organize** | Reorder, insert blank, duplicate, delete, rotate, import pages |
 | **Print / export** | System print + preview, PNG/JPEG export |
 | **History** | Undo / redo (bounded steps & memory) |
 | **Phase 3** | Document search (`Ctrl+F`), OCR (`Ctrl+Shift+T`), text extract (`Ctrl+T`), AES password protect, batch compress/extract/convert |
+| **Phase 4** | Text watermarks (opacity/angle/page scope), preset & custom stamps, image stamps |
 
 ---
 
@@ -230,11 +231,22 @@ OCR is optional: install [Tesseract](https://github.com/tesseract-ocr/tesseract)
 | Markup, edit, organize, print, undo | Shipped (0.2–0.3) |
 | Ribbon + multi-doc tabs | Shipped (0.4) |
 | Search, OCR, security, batch, installer | Shipped (0.5) |
-| Signatures, PDF/A, watermarks, cloud | Ideas (Phase 4) |
+| Watermarks & stamps | Shipped (0.6) |
+| Signatures, PDF/A, cloud, comparison | Ideas (Phase 4+) |
 
 ---
 
 ## Changelog (recent)
+
+### 0.6.0 — 2026-09-13
+
+Phase 4 start: watermarks and stamps.
+
+- **Added:** Text watermarks across all / current / ranged pages (opacity, angle, size)
+- **Added:** Rubber stamps with presets (DRAFT, CONFIDENTIAL, APPROVED, …) and custom text
+- **Added:** Image stamps for logos / signature images
+- **Added:** Markup ribbon **Stamp** group; Tools → Watermark / Stamp
+- **Changed:** Package version bumped to 0.6.0
 
 ### 0.5.0 — 2026-09-12
 

@@ -37,6 +37,7 @@ from src.processors.annotations import AnnotationProcessor
 from src.processors.content import ContentEditor
 from src.processors.forms import FormProcessor
 from src.processors.redaction import Redactor
+from src.processors.watermark import WatermarkProcessor
 from src.services.print_service import PrintService
 from src.ui.dialogs import (
     AddTextDialog,
@@ -45,7 +46,9 @@ from src.ui.dialogs import (
     FormDialog,
     PageOrganizerDialog,
     ReplaceTextDialog,
+    StampDialog,
     StickyNoteDialog,
+    WatermarkDialog,
 )
 from src.ui.tools import ToolMode
 from src.utils.exceptions import PDFMasterException
@@ -434,6 +437,74 @@ class EditController:
         self._begin_edit()
         removed = AnnotationProcessor.clear_page(self.document, page)
         self._finish(f"Removed {removed} markup item(s) from page {page + 1}")
+
+    def add_watermark(self) -> None:
+        """Open the watermark dialog and apply to selected pages."""
+        if not self._require_document():
+            return
+        dialog = WatermarkDialog(
+            self.document.page_count,
+            self._window.viewer.current_page if self._window.viewer else 0,
+            self._window,
+        )
+        if dialog.exec() != WatermarkDialog.DialogCode.Accepted:
+            return
+        values = dialog.result_values()
+        if not values["text"]:
+            self._warn("Enter watermark text first.")
+            return
+        pages = values["pages"]
+        if pages is not None and not pages:
+            self._warn("No valid pages in that range.")
+            return
+        try:
+            self._begin_edit()
+            count = WatermarkProcessor.add_text_watermark(
+                self.document,
+                values["text"],
+                pages=pages,
+                fontsize=values["fontsize"],
+                angle=values["angle"],
+                opacity=values["opacity"],
+            )
+        except PDFMasterException as exc:
+            self._warn(str(exc))
+            return
+        self._finish(f"Watermark added to {count} page(s)")
+
+    def add_stamp(self) -> None:
+        """Open the stamp dialog and place a text or image stamp."""
+        if not self._require_document():
+            return
+        dialog = StampDialog(self._window)
+        if dialog.exec() != StampDialog.DialogCode.Accepted:
+            return
+        values = dialog.result_values()
+        page = self._window.viewer.current_page if self._window.viewer else 0
+        if values["kind"] == "image":
+            path = values.get("image_path") or ""
+            if not path:
+                self._warn("Choose an image file for the stamp.")
+                return
+        elif not values["text"]:
+            self._warn("Enter stamp text first.")
+            return
+        try:
+            self._begin_edit()
+            if values["kind"] == "image":
+                WatermarkProcessor.add_image_stamp(
+                    self.document, page, values["image_path"]
+                )
+                kind = "image stamp"
+            else:
+                WatermarkProcessor.add_text_stamp(
+                    self.document, page, values["text"]
+                )
+                kind = "text stamp"
+        except PDFMasterException as exc:
+            self._warn(str(exc))
+            return
+        self._finish(f"Added {kind} on page {page + 1}")
 
     # ------------------------------------------------------------------
     # Printing and export

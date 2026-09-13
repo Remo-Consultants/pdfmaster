@@ -3,7 +3,7 @@
 Get PDFMaster running in about five minutes.
 
 **Prefer a Windows installer?** See [`INSTALL.md`](INSTALL.md) — download
-`PDFMaster-0.5.0-Setup.exe` or the portable ZIP from
+Setup.exe or the portable ZIP from
 [Releases](https://github.com/Remo-Consultants/pdfmaster/releases/latest),
 then skip to [First steps](#first-steps).
 
@@ -166,6 +166,7 @@ These live under the **Tools** menu:
 - **Ctrl+F** — Search Document (case / whole-word options, jump to hits)
 - **Ctrl+Shift+T** — OCR Scanned Pages (needs tesseract or easyocr)
 - **Ctrl+T** — Extract Text panel (page, range, or all pages → clipboard)
+- **Watermark…** / **Stamp…** — diagonal text watermarks or rubber/image stamps
 - **Batch Processing** — compress / extract / convert a folder of PDFs
 - **Security Info** / **Set Password** / **Remove Password** — view
   encryption status or write a protected / decrypted copy
