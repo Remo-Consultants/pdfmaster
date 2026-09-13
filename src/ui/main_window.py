@@ -69,6 +69,7 @@ from src.core.history import DocumentHistory
 from src.core.pdf_handler import PDFHandler
 from src.ui.edit_controller import EditController
 from src.ui.dialogs.batch_dialog import BatchDialog
+from src.ui.dialogs.compare_dialog import CompareDialog, PdfaDialog
 from src.ui.dialogs.ocr_dialog import OCRDialog
 from src.ui.dialogs.search_dialog import SearchDialog
 from src.ui.dialogs.security_dialog import (
@@ -438,6 +439,21 @@ class MainWindow(QMainWindow):
             self.stamp_action.setStatusTip("Add a text or image stamp on this page")
             self.stamp_action.triggered.connect(lambda: self.editor.add_stamp())
             tools_menu.addAction(self.stamp_action)
+
+            tools_menu.addSeparator()
+            self.compare_action = QAction("&Compare Documents...", self)
+            self.compare_action.setStatusTip(
+                "Compare this PDF with another file (text diff per page)"
+            )
+            self.compare_action.triggered.connect(self.open_compare_dialog)
+            tools_menu.addAction(self.compare_action)
+
+            self.pdfa_action = QAction("PDF/&A Check...", self)
+            self.pdfa_action.setStatusTip(
+                "Inspect PDF/A declaration and basic structure"
+            )
+            self.pdfa_action.triggered.connect(self.open_pdfa_dialog)
+            tools_menu.addAction(self.pdfa_action)
 
             tools_menu.addSeparator()
             security_menu = tools_menu.addMenu("&Security")
@@ -1216,6 +1232,8 @@ class MainWindow(QMainWindow):
             self.delete_action,
             getattr(self, "watermark_action", None),
             getattr(self, "stamp_action", None),
+            getattr(self, "compare_action", None),
+            getattr(self, "pdfa_action", None),
             self.fit_width_action,
             self.fit_page_action,
             self.zoom_in_action,
@@ -1268,6 +1286,22 @@ class MainWindow(QMainWindow):
     def open_batch_dialog(self) -> None:
         """Open the batch processing dialog."""
         dialog = BatchDialog(self)
+        dialog.exec()
+
+    def open_compare_dialog(self) -> None:
+        """Compare the open document with another PDF."""
+        if self.document is None:
+            self.statusBar().showMessage(MSG_NO_DOCUMENT)
+            return
+        dialog = CompareDialog(self.document.file_path, self)
+        dialog.exec()
+
+    def open_pdfa_dialog(self) -> None:
+        """Inspect PDF/A markers on the open document."""
+        if self.document is None:
+            self.statusBar().showMessage(MSG_NO_DOCUMENT)
+            return
+        dialog = PdfaDialog(self.document, self)
         dialog.exec()
 
     def toggle_text_panel(self) -> None:

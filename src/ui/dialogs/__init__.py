@@ -1,6 +1,7 @@
 """Dialogs used by the PDFMaster main window."""
 
 from src.ui.dialogs.batch_dialog import BatchDialog
+from src.ui.dialogs.compare_dialog import CompareDialog, PdfaDialog
 from src.ui.dialogs.export_dialog import ExportImagesDialog, parse_page_range
 from src.ui.dialogs.form_dialog import FormDialog
 from src.ui.dialogs.ocr_dialog import OCRDialog
@@ -22,12 +23,14 @@ from src.ui.dialogs.watermark_dialog import StampDialog, WatermarkDialog
 __all__ = [
     "AddTextDialog",
     "BatchDialog",
+    "CompareDialog",
     "ExportImagesDialog",
     "FindReplaceDialog",
     "FormDialog",
     "OCRDialog",
     "PageOrganizerDialog",
     "PasswordPromptDialog",
+    "PdfaDialog",
     "ReplaceTextDialog",
     "SearchDialog",
     "SecurityInfoDialog",

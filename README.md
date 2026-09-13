@@ -1,6 +1,6 @@
 # PDFMaster
 
-**Professional PDF viewer & editor for Windows — v0.6.0**
+**Professional PDF viewer & editor for Windows — v0.7.0**
 
 [![Release](https://img.shields.io/github/v/release/Remo-Consultants/pdfmaster?label=release)](https://github.com/Remo-Consultants/pdfmaster/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0f766e)](LICENSE)
@@ -75,7 +75,7 @@ Full packaging notes: [`INSTALL.md`](INSTALL.md).
 | **Print / export** | System print + preview, PNG/JPEG export |
 | **History** | Undo / redo (bounded steps & memory) |
 | **Phase 3** | Document search (`Ctrl+F`), OCR (`Ctrl+Shift+T`), text extract (`Ctrl+T`), AES password protect, batch compress/extract/convert |
-| **Phase 4** | Text watermarks (opacity/angle/page scope), preset & custom stamps, image stamps |
+| **Phase 4** | Text watermarks, stamps, document compare, PDF/A inspection |
 
 ---
 
@@ -232,11 +232,20 @@ OCR is optional: install [Tesseract](https://github.com/tesseract-ocr/tesseract)
 | Ribbon + multi-doc tabs | Shipped (0.4) |
 | Search, OCR, security, batch, installer | Shipped (0.5) |
 | Watermarks & stamps | Shipped (0.6) |
-| Signatures, PDF/A, cloud, comparison | Ideas (Phase 4+) |
+| Document compare & PDF/A check | Shipped (0.7) |
+| Signatures, cloud, visual diff | Ideas (later) |
 
 ---
 
 ## Changelog (recent)
+
+### 0.7.0 — 2026-09-13
+
+Document compare and PDF/A inspection.
+
+- **Added:** Compare Documents — text diff per page vs another PDF (Tools menu)
+- **Added:** PDF/A Check — declaration, part/conformance, OutputIntent, findings
+- **Changed:** Package version bumped to 0.7.0
 
 ### 0.6.0 — 2026-09-13
 
