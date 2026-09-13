@@ -9,7 +9,7 @@
 
 Offline-first desktop app for opening, reading, annotating, editing, securing, and batch-processing PDFs. Files never leave your machine.
 
-**Product page (styled):** open [`docs/index.html`](docs/index.html) in a browser · **Quick start:** [`QUICKSTART.md`](QUICKSTART.md) · **Install guide:** [`INSTALL.md`](INSTALL.md)
+**Product page:** https://remo-consultants.github.io/pdfmaster/ · **Quick start:** [`QUICKSTART.md`](QUICKSTART.md) · **Install guide:** [`INSTALL.md`](INSTALL.md)
 
 ---
 

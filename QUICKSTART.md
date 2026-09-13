@@ -7,7 +7,7 @@ Get PDFMaster running in about five minutes.
 [Releases](https://github.com/Remo-Consultants/pdfmaster/releases/latest),
 then skip to [First steps](#first-steps).
 
-**Styled overview:** open [`docs/index.html`](docs/index.html) in your browser.
+**Product page:** https://remo-consultants.github.io/pdfmaster/
 
 This page covers the **from-source** path for developers. If you already
 have the app installed, skip to [First steps](#first-steps).
