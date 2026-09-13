@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
+from PySide6.QtGui import QTextCursor
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -190,15 +191,28 @@ class FindReplaceDialog(QDialog):
 
 
 class StickyNoteDialog(QDialog):
-    """Collects the body of a sticky note."""
+    """Collects or edits the body of a sticky note."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(
+        self,
+        parent=None,
+        *,
+        text: str = "",
+        editing: bool = False,
+    ) -> None:
         super().__init__(parent)
-        self.setWindowTitle("Add Note")
-        self.resize(420, 240)
+        self.setWindowTitle("Edit Note" if editing else "Add Note")
+        self.resize(420, 260)
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("Note text:"))
+        hint = (
+            "Update the note text below."
+            if editing
+            else "Type the note to attach at the clicked spot."
+        )
+        layout.addWidget(QLabel(hint))
         self.text_edit = QPlainTextEdit()
+        self.text_edit.setPlainText(text)
+        self.text_edit.moveCursor(QTextCursor.MoveOperation.End)
         layout.addWidget(self.text_edit, stretch=1)
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
@@ -206,6 +220,7 @@ class StickyNoteDialog(QDialog):
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+        self.text_edit.setFocus()
 
     def text(self) -> str:
         return self.text_edit.toPlainText()

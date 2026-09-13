@@ -45,7 +45,7 @@ TOOL_HINTS: Dict[ToolMode, str] = {
     ToolMode.HIGHLIGHT: "Drag across text to highlight it.",
     ToolMode.UNDERLINE: "Drag across text to underline it.",
     ToolMode.STRIKEOUT: "Drag across text to strike it out.",
-    ToolMode.NOTE: "Click where you want to attach a note.",
+    ToolMode.NOTE: "Click empty space to add a note, or click an existing note to open it.",
     ToolMode.PEN: "Draw freehand with the mouse held down.",
     ToolMode.SHAPE: "Drag to draw a rectangle outline.",
     ToolMode.TEXT: "Drag a box, then type the text to add.",

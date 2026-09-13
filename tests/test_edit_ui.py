@@ -271,6 +271,48 @@ def test_sticky_note_uses_the_dialog(qtbot, main_window, make_text_pdf, monkeypa
     assert annots[0]["content"] == "review this"
 
 
+def test_sticky_note_reopens_existing(qtbot, main_window, make_text_pdf, monkeypatch) -> None:
+    open_and_wait(qtbot, main_window, make_text_pdf())
+    from src.ui import edit_controller
+
+    AnnotationProcessor.add_sticky_note(main_window.document, 0, (72, 72), "keep me")
+    main_window.refresh_after_edit()
+
+    seen: list[str] = []
+
+    def fake_init(self, parent=None, *, text: str = "", editing: bool = False) -> None:
+        QDialog.__init__(self, parent)
+        self._text = text
+        self._editing = editing
+        seen.append(text)
+
+    monkeypatch.setattr(edit_controller.StickyNoteDialog, "__init__", fake_init)
+    monkeypatch.setattr(
+        edit_controller.StickyNoteDialog, "exec",
+        lambda self: QDialog.DialogCode.Accepted,
+    )
+    monkeypatch.setattr(
+        edit_controller.StickyNoteDialog, "text", lambda self: "keep me — updated"
+    )
+
+    viewer = main_window.viewer
+    main_window.set_tool(ToolMode.NOTE)
+    # PDF (72,72) mapped roughly — use page_origin + zoomed offset
+    origin = viewer.page_origin(viewer.current_page)
+    zoom = viewer.zoom_level
+    act_and_wait(
+        qtbot,
+        viewer,
+        lambda: viewer.handle_press(
+            QPointF(origin.x() + 72 * zoom, origin.y() + 72 * zoom)
+        ),
+    )
+
+    assert seen and seen[0] == "keep me"
+    annots = AnnotationProcessor.list_annotations(main_window.document, 0)
+    assert annots[0]["content"] == "keep me — updated"
+
+
 def test_pen_tool_stores_ink(qtbot, main_window, make_text_pdf) -> None:
     open_and_wait(qtbot, main_window, make_text_pdf())
     viewer = main_window.viewer

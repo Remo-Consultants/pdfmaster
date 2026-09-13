@@ -131,10 +131,72 @@ class AnnotationProcessor:
             raise AnnotationError("A note needs some text.")
         with document.transaction() as pdf:
             page = pdf.load_page(page_num)
-            annot = page.add_text_annot(fitz.Point(*point), text)
-            annot.set_info(title=title)
+            annot = page.add_text_annot(fitz.Point(*point), text.strip())
+            annot.set_info(title=title, content=text.strip())
+            # Named icon so the sticky is visible on the rendered page.
+            try:
+                annot.set_name("Comment")
+            except Exception:  # noqa: BLE001 - older PyMuPDF variants
+                pass
             annot.update()
         logger.info("Added sticky note on page %s", page_num + 1)
+
+    @staticmethod
+    def find_text_annotation_at(
+        document: Document,
+        page_num: int,
+        point: Point,
+        *,
+        pad: float = 16.0,
+    ) -> Optional[Dict[str, Any]]:
+        """Return the Text (sticky) annotation under ``point``, if any.
+
+        Sticky icons are tiny, so the hit box is expanded by ``pad`` PDF
+        points in every direction.
+        """
+        target = fitz.Point(*point)
+        with document.transaction(mark_modified=False) as pdf:
+            page = pdf.load_page(page_num)
+            for index, annot in enumerate(page.annots() or []):
+                if annot.type[1] != "Text":
+                    continue
+                rect = fitz.Rect(annot.rect)
+                hit = fitz.Rect(
+                    rect.x0 - pad, rect.y0 - pad, rect.x1 + pad, rect.y1 + pad
+                )
+                if target in hit:
+                    info = annot.info
+                    return {
+                        "index": index,
+                        "type": annot.type[1],
+                        "rect": tuple(annot.rect),
+                        "content": info.get("content", "") or "",
+                        "title": info.get("title", "") or "",
+                    }
+        return None
+
+    @staticmethod
+    def update_sticky_note(
+        document: Document,
+        page_num: int,
+        index: int,
+        text: str,
+        title: str = "PDFMaster",
+    ) -> None:
+        """Replace the body of an existing sticky note."""
+        if not text.strip():
+            raise AnnotationError("A note needs some text.")
+        with document.transaction() as pdf:
+            page = pdf.load_page(page_num)
+            annots = list(page.annots() or [])
+            if index < 0 or index >= len(annots):
+                raise AnnotationError(f"No annotation at position {index}.")
+            annot = annots[index]
+            if annot.type[1] != "Text":
+                raise AnnotationError("That markup is not a sticky note.")
+            annot.set_info(title=title, content=text.strip())
+            annot.update()
+        logger.info("Updated sticky note %s on page %s", index, page_num + 1)
 
     @staticmethod
     def add_ink(

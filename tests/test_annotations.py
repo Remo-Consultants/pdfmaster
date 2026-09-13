@@ -60,6 +60,17 @@ def test_sticky_note(make_text_pdf) -> None:
             AnnotationProcessor.add_sticky_note(doc, 0, (10, 10), "   ")
 
 
+def test_find_and_update_sticky_note(make_text_pdf) -> None:
+    with Document(make_text_pdf()) as doc:
+        AnnotationProcessor.add_sticky_note(doc, 0, (300, 300), "original")
+        hit = AnnotationProcessor.find_text_annotation_at(doc, 0, (302, 302))
+        assert hit is not None
+        assert hit["content"] == "original"
+        AnnotationProcessor.update_sticky_note(doc, 0, hit["index"], "revised")
+        assert AnnotationProcessor.list_annotations(doc, 0)[0]["content"] == "revised"
+        assert AnnotationProcessor.find_text_annotation_at(doc, 0, (10, 10)) is None
+
+
 def test_ink_annotation(make_text_pdf) -> None:
     with Document(make_text_pdf()) as doc:
         AnnotationProcessor.add_ink(doc, 0, [[(50, 50), (60, 70), (80, 90)]])

@@ -201,6 +201,27 @@ class EditController:
         self._finish(MSG_ANNOT_ADDED.format(kind="rectangle", page=page + 1))
 
     def _add_note(self, page: int, point: Tuple[float, float]) -> None:
+        existing = AnnotationProcessor.find_text_annotation_at(
+            self.document, page, point
+        )
+        if existing is not None:
+            dialog = StickyNoteDialog(
+                self._window,
+                text=existing.get("content", ""),
+                editing=True,
+            )
+            if dialog.exec() != StickyNoteDialog.DialogCode.Accepted:
+                return
+            text = dialog.text()
+            if not text.strip():
+                return
+            self._begin_edit()
+            AnnotationProcessor.update_sticky_note(
+                self.document, page, int(existing["index"]), text
+            )
+            self._finish(f"Updated note on page {page + 1}")
+            return
+
         dialog = StickyNoteDialog(self._window)
         if dialog.exec() != StickyNoteDialog.DialogCode.Accepted:
             return
