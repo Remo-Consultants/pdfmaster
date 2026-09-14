@@ -100,17 +100,9 @@ Full packaging notes: [`INSTALL.md`](INSTALL.md).
 
 PDFMaster is composed like a commercial desktop product — not a thin wrapper around a PDF library.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  Home · Markup · Edit · Organize · Review · View [ribbon]       │
-├──────────┬──────────────────────────────────────┬───────────────┤
-│ Thumbs   │                                      │ Properties    │
-│ Bookmarks│     Continuous soft-shadow pages     │ Text extract  │
-│          │         Multi-document tabs          │               │
-├──────────┴──────────────────────────────────────┴───────────────┤
-│  Status: Ready · tool guidance · page / zoom                    │
-└─────────────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="docs/assets/screenshots/workspace-review.png" alt="PDFMaster 0.8.1 — Review ribbon with Search, OCR, Compare, PDF/A, and Batch" width="100%" />
+</p>
 
 - **Ribbon** — Home / Markup / Edit / Organize / **Review** / View with labelled groups and HiDPI SVG icons (matches the [product page](https://remo-consultants.github.io/pdfmaster/) tab names — the site is marketing, the app is the real UI)
 - **Tabs** — each open PDF keeps its own zoom, page, and undo history

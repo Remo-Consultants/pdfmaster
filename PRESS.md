@@ -83,6 +83,9 @@ PDFMaster is independent and not affiliated with Adobe, Foxit, Microsoft, or the
 | --- | --- |
 | Hero banner (SVG) | `docs/assets/banner.svg` |
 | App mark (SVG) | `docs/assets/mark.svg` |
+| Workspace screenshot | `docs/assets/screenshots/workspace-review.png` |
+| Welcome screenshot | `docs/assets/screenshots/welcome.png` |
+| Markup screenshot | `docs/assets/screenshots/workspace-markup.png` |
 | Product page | `docs/index.html` |
 | Manifesto | `REFLECTION.md` |
 | Full README | `README.md` |
