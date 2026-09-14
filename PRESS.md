@@ -80,7 +80,8 @@ PDFMaster is independent and not affiliated with Adobe, Foxit, Microsoft, or the
 
 | Asset | Path |
 | --- | --- |
-| Hero banner (SVG) | `docs/assets/banner.svg` |
+| Hero banner (PNG) | `docs/assets/banner.png` |
+| Hero banner (SVG source) | `docs/assets/banner.svg` |
 | App mark (SVG) | `docs/assets/mark.svg` |
 | Workspace screenshot | `docs/assets/screenshots/workspace-review.png` |
 | Welcome screenshot | `docs/assets/screenshots/welcome.png` |

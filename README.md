@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/banner.svg" alt="PDFMaster — The desk, not the cloud." width="100%" />
+  <img src="docs/assets/banner.png" alt="PDFMaster — The desk, not the cloud." width="100%" />
 </p>
 
 <p align="center">
