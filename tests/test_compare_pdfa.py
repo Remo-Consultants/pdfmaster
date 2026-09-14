@@ -46,6 +46,41 @@ def test_compare_changed_and_extra_page(tmp_path: Path) -> None:
     assert report.changed_count == 2
 
 
+def test_visual_compare_identical(tmp_path: Path) -> None:
+    a = tmp_path / "a.pdf"
+    b = tmp_path / "b.pdf"
+    _write_pdf(a, ["Visual page"])
+    _write_pdf(b, ["Visual page"])
+    report = CompareService.compare_files(a, b, include_visual=True)
+    assert report.pages[0].visual_similarity is not None
+    assert report.pages[0].visual_similarity > 0.95
+    assert report.identical
+
+
+def test_visual_compare_detects_markup(tmp_path: Path) -> None:
+    a = tmp_path / "a.pdf"
+    b = tmp_path / "b.pdf"
+    doc = fitz.open()
+    page = doc.new_page()
+    page.insert_text((72, 72), "Same words")
+    doc.save(a)
+    doc.close()
+    doc = fitz.open()
+    page = doc.new_page()
+    page.insert_text((72, 72), "Same words")
+    shape = page.new_shape()
+    shape.draw_rect(fitz.Rect(72, 200, 400, 500))
+    shape.finish(color=(1, 0, 0), fill=(1, 0, 0), width=0)
+    shape.commit()
+    doc.save(b)
+    doc.close()
+    report = CompareService.compare_files(a, b, include_visual=True)
+    assert report.pages[0].similarity == 1.0
+    assert report.pages[0].visual_similarity is not None
+    assert report.pages[0].visual_similarity < 0.99
+    assert report.pages[0].status == "changed"
+
+
 def test_compare_rejects_same_path(tmp_path: Path) -> None:
     a = tmp_path / "a.pdf"
     _write_pdf(a, ["x"])

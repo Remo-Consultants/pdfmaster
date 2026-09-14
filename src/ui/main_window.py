@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QDockWidget,
     QFileDialog,
     QLabel,
+    QInputDialog,
     QMainWindow,
     QMessageBox,
     QSizePolicy,
@@ -471,6 +472,13 @@ class MainWindow(QMainWindow):
             self.remove_password_action.setStatusTip("Remove password protection")
             self.remove_password_action.triggered.connect(self.remove_document_password)
             security_menu.addAction(self.remove_password_action)
+
+            self.add_signature_field_action = QAction("Add &Signature Field...", self)
+            self.add_signature_field_action.setStatusTip(
+                "Place an empty signature field on the current page"
+            )
+            self.add_signature_field_action.triggered.connect(self.add_signature_field)
+            security_menu.addAction(self.add_signature_field_action)
 
         help_menu = menu_bar.addMenu("&Help")
         about_action = QAction("&About", self)
@@ -1234,6 +1242,7 @@ class MainWindow(QMainWindow):
             getattr(self, "stamp_action", None),
             getattr(self, "compare_action", None),
             getattr(self, "pdfa_action", None),
+            getattr(self, "add_signature_field_action", None),
             self.fit_width_action,
             self.fit_page_action,
             self.zoom_in_action,
@@ -1320,6 +1329,21 @@ class MainWindow(QMainWindow):
             return
         dialog = SecurityInfoDialog(self.document, self)
         dialog.exec()
+
+    def add_signature_field(self) -> None:
+        """Add an empty signature widget on the current page."""
+        if self.document is None:
+            self.statusBar().showMessage(MSG_NO_DOCUMENT)
+            return
+        name, ok = QInputDialog.getText(
+            self,
+            "Signature Field",
+            "Field name:",
+            text="Signature",
+        )
+        if not ok:
+            return
+        self.editor.add_signature_field(name)
 
     def set_document_password(self) -> None:
         """Set password protection on the current document."""

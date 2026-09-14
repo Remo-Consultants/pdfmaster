@@ -167,11 +167,10 @@ These live under the **Tools** menu:
 - **Ctrl+Shift+T** — OCR Scanned Pages (needs tesseract or easyocr)
 - **Ctrl+T** — Extract Text panel (page, range, or all pages → clipboard)
 - **Watermark…** / **Stamp…** — diagonal text watermarks or rubber/image stamps
-- **Compare Documents…** — text diff against another PDF
+- **Compare Documents…** — text diff (optional visual/rendered compare)
 - **PDF/A Check…** — see if the file declares PDF/A and basic findings
 - **Batch Processing** — compress / extract / convert a folder of PDFs
-- **Security Info** / **Set Password** / **Remove Password** — view
-  encryption status or write a protected / decrypted copy
+- **Security Info** / **Set Password** / **Remove Password** / **Add Signature Field**
 
 ---
 

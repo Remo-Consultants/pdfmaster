@@ -1,6 +1,6 @@
 # PDFMaster
 
-**Professional PDF viewer & editor for Windows — v0.7.0**
+**Professional PDF viewer & editor for Windows — v0.8.0**
 
 [![Release](https://img.shields.io/github/v/release/Remo-Consultants/pdfmaster?label=release)](https://github.com/Remo-Consultants/pdfmaster/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0f766e)](LICENSE)
@@ -75,7 +75,7 @@ Full packaging notes: [`INSTALL.md`](INSTALL.md).
 | **Print / export** | System print + preview, PNG/JPEG export |
 | **History** | Undo / redo (bounded steps & memory) |
 | **Phase 3** | Document search (`Ctrl+F`), OCR (`Ctrl+Shift+T`), text extract (`Ctrl+T`), AES password protect, batch compress/extract/convert |
-| **Phase 4** | Text watermarks, stamps, document compare, PDF/A inspection |
+| **Phase 4** | Watermarks, stamps, text/visual compare, PDF/A check, signature fields |
 
 ---
 
@@ -233,11 +233,20 @@ OCR is optional: install [Tesseract](https://github.com/tesseract-ocr/tesseract)
 | Search, OCR, security, batch, installer | Shipped (0.5) |
 | Watermarks & stamps | Shipped (0.6) |
 | Document compare & PDF/A check | Shipped (0.7) |
-| Signatures, cloud, visual diff | Ideas (later) |
+| Visual compare & signature fields | Shipped (0.8) |
+| Certificate signing, cloud, PDF/A conversion | Ideas (later) |
 
 ---
 
 ## Changelog (recent)
+
+### 0.8.0 — 2026-09-14
+
+Visual document compare and signature fields.
+
+- **Added:** Optional rendered-page comparison in Compare Documents (catches layout/scan changes text misses)
+- **Added:** Tools → Security → Add Signature Field (empty widget on current page)
+- **Changed:** Package version bumped to 0.8.0
 
 ### 0.7.0 — 2026-09-13
 

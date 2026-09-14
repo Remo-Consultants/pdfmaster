@@ -6,6 +6,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QCheckBox,
     QDialog,
     QDialogButtonBox,
     QFileDialog,
@@ -59,6 +60,11 @@ class CompareDialog(QDialog):
         form.addRow("Other:", row)
         layout.addLayout(form)
 
+        self.visual_check = QCheckBox(
+            "Compare rendered appearance (slower, catches layout and scan changes)"
+        )
+        layout.addWidget(self.visual_check)
+
         self.run_button = QPushButton("Compare")
         self.run_button.clicked.connect(self._run)
         layout.addWidget(self.run_button)
@@ -95,7 +101,11 @@ class CompareDialog(QDialog):
             self.summary.setText("Choose a second PDF first.")
             return
         try:
-            self._report = CompareService.compare_files(self._left_path, other)
+            self._report = CompareService.compare_files(
+                self._left_path,
+                other,
+                include_visual=self.visual_check.isChecked(),
+            )
         except PDFMasterException as exc:
             self.summary.setText(str(exc))
             return
@@ -105,13 +115,14 @@ class CompareDialog(QDialog):
             return
 
         report = self._report
+        mode = "text + visual" if report.include_visual else "text"
         if report.identical:
             self.summary.setText(
-                f"Identical text across {report.left_pages} page(s)."
+                f"Identical ({mode}) across {report.left_pages} page(s)."
             )
         else:
             self.summary.setText(
-                f"{report.changed_count} page(s) differ "
+                f"{report.changed_count} page(s) differ ({mode}) "
                 f"(left {report.left_pages} · right {report.right_pages})."
             )
 
@@ -119,7 +130,10 @@ class CompareDialog(QDialog):
         for page in report.pages:
             label = f"Page {page.page + 1} — {page.status}"
             if page.status == "changed":
-                label += f" ({page.similarity:.0%} similar)"
+                label += f" (text {page.similarity:.0%}"
+                if page.visual_similarity is not None:
+                    label += f", visual {page.visual_similarity:.0%}"
+                label += ")"
             item = QListWidgetItem(label)
             item.setData(Qt.ItemDataRole.UserRole, page.page)
             self.page_list.addItem(item)
@@ -133,14 +147,20 @@ class CompareDialog(QDialog):
         page = self._report.pages[row]
         lines = [
             f"Status: {page.status}",
-            f"Similarity: {page.similarity:.1%}",
+            f"Text similarity: {page.similarity:.1%}",
+        ]
+        if page.visual_similarity is not None:
+            lines.append(f"Visual similarity: {page.visual_similarity:.1%}")
+        lines.extend(
+            [
             "",
             "Left preview:",
             page.left_preview or "(empty)",
             "",
             "Right preview:",
             page.right_preview or "(empty)",
-        ]
+            ]
+        )
         if page.unified:
             lines.extend(["", "Unified diff:", page.unified])
         self.detail.setPlainText("\n".join(lines))

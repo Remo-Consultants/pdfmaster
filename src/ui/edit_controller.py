@@ -39,6 +39,7 @@ from src.processors.forms import FormProcessor
 from src.processors.redaction import Redactor
 from src.processors.watermark import WatermarkProcessor
 from src.services.print_service import PrintService
+from src.services.security_service import SignatureService
 from src.ui.dialogs import (
     AddTextDialog,
     ExportImagesDialog,
@@ -505,6 +506,35 @@ class EditController:
             self._warn(str(exc))
             return
         self._finish(f"Added {kind} on page {page + 1}")
+
+    def add_signature_field(self, field_name: str = "Signature") -> None:
+        """Place an empty digital-signature field on the current page."""
+        if not self._require_document():
+            return
+        if self._window.viewer is None:
+            return
+        name = (field_name or "").strip() or "Signature"
+        page = self._window.viewer.current_page
+        with self.document.transaction(mark_modified=False) as pdf:
+            rect = pdf.load_page(page).rect
+        width, height = 220.0, 56.0
+        cx = (rect.x0 + rect.x1) / 2.0
+        cy = (rect.y0 + rect.y1) / 2.0
+        area = (
+            cx - width / 2,
+            cy - height / 2,
+            cx + width / 2,
+            cy + height / 2,
+        )
+        try:
+            self._begin_edit()
+            SignatureService.add_signature_field(
+                self.document, page, area, field_name=name
+            )
+        except PDFMasterException as exc:
+            self._warn(str(exc))
+            return
+        self._finish(f"Added signature field '{name}' on page {page + 1}")
 
     # ------------------------------------------------------------------
     # Printing and export
