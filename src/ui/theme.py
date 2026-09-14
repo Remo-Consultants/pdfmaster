@@ -1,7 +1,7 @@
-"""Light/dark theming that follows the Windows colour scheme.
+"""Quiet paper-studio theming that follows the Windows colour scheme.
 
-Qt 6.5+ reports the OS preference through ``QStyleHints.colorScheme()``
-and emits a signal when the user changes it, so PDFMaster can follow
+Brand accent matches the product site (teal). Qt 6.5+ reports the OS
+preference through ``QStyleHints.colorScheme()`` so PDFMaster can follow
 along without a restart.
 """
 
@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Dict
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QGuiApplication, QPalette
+from PySide6.QtGui import QColor, QFont, QGuiApplication, QPalette
 
 from src.utils.logger import get_logger
 
@@ -19,56 +19,72 @@ logger = get_logger(__name__)
 LIGHT = "light"
 DARK = "dark"
 
+# Corner radius used across QSS (stored as a digit string for the token table).
+RADIUS_PX = 8
+
 # Every colour the UI needs, per scheme. Keeping them in one table makes
 # it obvious when a scheme is missing a value.
 COLORS: Dict[str, Dict[str, str]] = {
     LIGHT: {
-        "window": "#f3f3f3",
-        "window_text": "#1a1a1a",
+        "window": "#f4f6f8",
+        "window_text": "#0f172a",
         "base": "#ffffff",
-        "alternate_base": "#f7f7f7",
-        "text": "#1a1a1a",
-        "button": "#fbfbfb",
-        "button_text": "#1a1a1a",
+        "alternate_base": "#f1f5f9",
+        "text": "#0f172a",
+        "button": "#ffffff",
+        "button_text": "#0f172a",
         "bright_text": "#ffffff",
-        "highlight": "#0067c0",
+        "highlight": "#0f766e",
         "highlight_text": "#ffffff",
-        "disabled_text": "#9a9a9a",
-        "border": "#d6d6d6",
-        # The viewer canvas is deliberately a mid grey, not white, so the
-        # page edges stay visible against it.
-        "canvas": "#7a7a7a",
-        "page_border": "#5c5c5c",
-        "shadow": "#4a4a4a",
-        "icon": "#2b2b2b",
-        "icon_disabled": "#a8a8a8",
-        "accent": "#0067c0",
-        "panel": "#fafafa",
-        "hover": "#e6e6e6",
-        "checked": "#cfe4f7",
+        "disabled_text": "#94a3b8",
+        "border": "#e2e8f0",
+        # Soft studio canvas — calm enough that paper edges still read.
+        "canvas": "#e8eef2",
+        "page_border": "#cbd5e1",
+        "shadow": "#64748b",
+        "icon": "#1e293b",
+        "icon_disabled": "#94a3b8",
+        "accent": "#0f766e",
+        "accent_soft": "#ccfbf1",
+        "panel": "#f8fafc",
+        "hover": "#eef2f6",
+        "checked": "#ccfbf1",
+        "paper": "#ffffff",
+        "surface": "#f8fafc",
+        "muted": "#64748b",
+        "danger": "#dc2626",
+        "success": "#059669",
+        "radius": str(RADIUS_PX),
     },
     DARK: {
-        "window": "#202020",
-        "window_text": "#eaeaea",
-        "base": "#2b2b2b",
-        "alternate_base": "#323232",
-        "text": "#eaeaea",
-        "button": "#2d2d2d",
-        "button_text": "#eaeaea",
+        "window": "#0f1419",
+        "window_text": "#e8eef2",
+        "base": "#1a222c",
+        "alternate_base": "#222b36",
+        "text": "#e8eef2",
+        "button": "#1e2732",
+        "button_text": "#e8eef2",
         "bright_text": "#ffffff",
-        "highlight": "#4cc2ff",
-        "highlight_text": "#0a0a0a",
-        "disabled_text": "#9a9a9a",
-        "border": "#3d3d3d",
-        "canvas": "#1a1a1a",
-        "page_border": "#000000",
-        "shadow": "#0d0d0d",
-        "icon": "#e4e4e4",
-        "icon_disabled": "#8a8a8a",
-        "accent": "#4cc2ff",
-        "panel": "#252525",
-        "hover": "#383838",
-        "checked": "#15466b",
+        "highlight": "#14b8a6",
+        "highlight_text": "#042f2e",
+        "disabled_text": "#64748b",
+        "border": "#2d3744",
+        "canvas": "#121820",
+        "page_border": "#0a0e12",
+        "shadow": "#000000",
+        "icon": "#e2e8f0",
+        "icon_disabled": "#64748b",
+        "accent": "#14b8a6",
+        "accent_soft": "#134e4a",
+        "panel": "#161d26",
+        "hover": "#243040",
+        "checked": "#134e4a",
+        "paper": "#1a222c",
+        "surface": "#161d26",
+        "muted": "#94a3b8",
+        "danger": "#f87171",
+        "success": "#34d399",
+        "radius": str(RADIUS_PX),
     },
 }
 
@@ -91,6 +107,16 @@ def color(name: str, scheme: str) -> str:
     return COLORS.get(scheme, COLORS[LIGHT]).get(name, COLORS[LIGHT][name])
 
 
+def apply_app_font(app: QGuiApplication) -> None:
+    """Set a calm Segoe UI Variable hierarchy for the whole app."""
+    font = QFont("Segoe UI Variable")
+    if not font.exactMatch():
+        font = QFont("Segoe UI")
+    font.setStyleHint(QFont.StyleHint.SansSerif)
+    font.setPointSize(10)
+    app.setFont(font)
+
+
 def build_palette(scheme: str) -> QPalette:
     """Build the QPalette for a scheme."""
     c = COLORS.get(scheme, COLORS[LIGHT])
@@ -111,6 +137,7 @@ def build_palette(scheme: str) -> QPalette:
     palette.setColor(role.ToolTipBase, QColor(c["base"]))
     palette.setColor(role.ToolTipText, QColor(c["text"]))
     palette.setColor(role.PlaceholderText, QColor(c["disabled_text"]))
+    palette.setColor(role.Link, QColor(c["accent"]))
 
     for disabled in (role.Text, role.WindowText, role.ButtonText):
         palette.setColor(group.Disabled, disabled, QColor(c["disabled_text"]))
@@ -120,23 +147,27 @@ def build_palette(scheme: str) -> QPalette:
 def build_stylesheet(scheme: str) -> str:
     """Style the widgets whose defaults look out of place on Windows."""
     c = COLORS.get(scheme, COLORS[LIGHT])
+    r = c.get("radius", str(RADIUS_PX))
     return f"""
+    QMainWindow {{
+        background: {c['window']};
+    }}
     QToolBar {{
         background: {c['window']};
         border: 0px;
         border-bottom: 1px solid {c['border']};
         spacing: 2px;
-        padding: 3px 6px;
+        padding: 4px 8px;
     }}
     QToolBar::separator {{
         background: {c['border']};
         width: 1px;
-        margin: 4px 5px;
+        margin: 6px 6px;
     }}
     QToolButton {{
         background: transparent;
         border: 1px solid transparent;
-        border-radius: 4px;
+        border-radius: {r}px;
         padding: 4px;
         color: {c['button_text']};
     }}
@@ -152,29 +183,34 @@ def build_stylesheet(scheme: str) -> str:
     QStatusBar {{
         background: {c['window']};
         border-top: 1px solid {c['border']};
-        color: {c['window_text']};
+        color: {c['muted']};
+        padding: 2px 8px;
+        min-height: 22px;
     }}
     QStatusBar::item {{ border: 0px; }}
     QDockWidget {{
         color: {c['window_text']};
         titlebar-close-icon: none;
         titlebar-normal-icon: none;
+        font-weight: 600;
     }}
     QDockWidget::title {{
         background: {c['panel']};
-        padding: 6px 8px;
+        padding: 8px 10px;
         border-bottom: 1px solid {c['border']};
+        text-align: left;
     }}
     QListWidget, QTreeWidget, QPlainTextEdit, QLineEdit, QSpinBox, QComboBox {{
         background: {c['base']};
         color: {c['text']};
         border: 1px solid {c['border']};
-        border-radius: 4px;
+        border-radius: {r}px;
+        padding: 2px 4px;
         selection-background-color: {c['highlight']};
         selection-color: {c['highlight_text']};
     }}
     QListWidget {{ outline: 0; }}
-    QListWidget::item {{ padding: 3px; border-radius: 4px; }}
+    QListWidget::item {{ padding: 4px; border-radius: 6px; }}
     QListWidget::item:hover {{ background: {c['hover']}; }}
     QListWidget::item:selected {{
         background: {c['checked']};
@@ -187,11 +223,13 @@ def build_stylesheet(scheme: str) -> str:
         selection-background-color: transparent;
         selection-color: {c['text']};
         background: {c['panel']};
+        border: none;
+        border-radius: 0;
     }}
     QListWidget#thumbnailPanel::item {{
         border: 2px solid transparent;
-        border-radius: 3px;
-        margin: 1px;
+        border-radius: 6px;
+        margin: 2px;
     }}
     QListWidget#thumbnailPanel::item:hover {{
         background: transparent;
@@ -203,7 +241,7 @@ def build_stylesheet(scheme: str) -> str:
     }}
     QScrollArea {{ border: 0px; }}
     QSlider::groove:horizontal {{
-        height: 4px;
+        height: 3px;
         background: {c['border']};
         border-radius: 2px;
     }}
@@ -214,20 +252,100 @@ def build_stylesheet(scheme: str) -> str:
         margin: -5px 0;
         border-radius: 6px;
     }}
-    QMenuBar {{ background: {c['window']}; color: {c['window_text']}; }}
+    QMenuBar {{
+        background: {c['window']};
+        color: {c['window_text']};
+        padding: 2px 4px;
+        border-bottom: 1px solid {c['border']};
+    }}
+    QMenuBar::item {{
+        padding: 4px 10px;
+        border-radius: 6px;
+    }}
     QMenuBar::item:selected {{ background: {c['hover']}; }}
     QMenu {{
         background: {c['base']};
         color: {c['text']};
         border: 1px solid {c['border']};
+        border-radius: {r}px;
+        padding: 4px;
     }}
-    QMenu::item:selected {{ background: {c['highlight']}; color: {c['highlight_text']}; }}
-    QMenu::separator {{ height: 1px; background: {c['border']}; margin: 4px 8px; }}
+    QMenu::item {{
+        padding: 6px 28px 6px 12px;
+        border-radius: 6px;
+    }}
+    QMenu::item:selected {{
+        background: {c['highlight']};
+        color: {c['highlight_text']};
+    }}
+    QMenu::separator {{
+        height: 1px;
+        background: {c['border']};
+        margin: 4px 8px;
+    }}
+    QTabWidget#documentTabs::pane {{
+        border: none;
+        background: {c['canvas']};
+    }}
+    QTabWidget#documentTabs QTabBar::tab {{
+        background: transparent;
+        color: {c['muted']};
+        padding: 8px 14px;
+        margin-right: 2px;
+        border: none;
+        border-bottom: 2px solid transparent;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }}
+    QTabWidget#documentTabs QTabBar::tab:hover {{
+        background: {c['hover']};
+        color: {c['text']};
+    }}
+    QTabWidget#documentTabs QTabBar::tab:selected {{
+        color: {c['text']};
+        background: {c['surface']};
+        border-bottom: 2px solid {c['accent']};
+        font-weight: 600;
+    }}
+    QPushButton#welcomePrimary {{
+        background: {c['window_text']};
+        color: {c['bright_text']};
+        border: none;
+        border-radius: 10px;
+        padding: 12px 22px;
+        font-weight: 600;
+        font-size: 13px;
+    }}
+    QPushButton#welcomePrimary:hover {{
+        background: {c['accent']};
+    }}
+    QPushButton#welcomeGhost {{
+        background: transparent;
+        color: {c['text']};
+        border: 1px solid {c['border']};
+        border-radius: 10px;
+        padding: 10px 18px;
+        font-weight: 500;
+    }}
+    QPushButton#welcomeGhost:hover {{
+        background: {c['hover']};
+        border-color: {c['accent']};
+    }}
+    QFrame#welcomeDropZone {{
+        background: {c['surface']};
+        border: 1.5px dashed {c['border']};
+        border-radius: 16px;
+    }}
+    QFrame#welcomeDropZone[dragActive="true"] {{
+        border-color: {c['accent']};
+        background: {c['accent_soft']};
+    }}
     """
 
 
 def apply_theme(app: QGuiApplication, scheme: str) -> None:
     """Apply the palette and stylesheet for ``scheme`` to the application."""
+    apply_app_font(app)
     app.setPalette(build_palette(scheme))
     app.setStyleSheet(build_stylesheet(scheme))
     logger.info("Applied %s theme", scheme)

@@ -1,13 +1,15 @@
 # Install PDFMaster
 
-Straight paths from download to working on a PDF. Product overview: [`docs/index.html`](docs/index.html).
+Straight paths from download to working on a PDF.
+
+**Product overview:** [`docs/index.html`](docs/index.html) · **Why PDFMaster:** [`REFLECTION.md`](REFLECTION.md) · **Media:** [`PRESS.md`](PRESS.md)
 
 ---
 
 ## Path 1 — Setup.exe (recommended for most users)
 
 1. Go to [Releases](https://github.com/Remo-Consultants/pdfmaster/releases/latest)
-2. Download **`PDFMaster-0.5.0-Setup.exe`**
+2. Download **`PDFMaster-*-Setup.exe`** from the latest release
 3. Run it (admin elevation is normal for Program Files)
 4. Finish the wizard — Start Menu and desktop shortcuts are created
 5. Start **PDFMaster**
@@ -19,7 +21,7 @@ Straight paths from download to working on a PDF. Product overview: [`docs/index
 
 ## Path 2 — Portable ZIP
 
-1. Download **`PDFMaster-0.5.0-win64.zip`** from the same release
+1. Download **`PDFMaster-*-win64.zip`** from the same release
 2. Extract to any folder (e.g. `Documents\PDFMaster` or a USB drive)
 3. Double-click **`PDFMaster.exe`**
 4. Optional: pin the exe to the taskbar
@@ -73,8 +75,8 @@ python installer/build_installer.py --clean --nsis
 | Output | Description |
 | --- | --- |
 | `dist/PDFMaster/PDFMaster.exe` | Runnable folder build |
-| `dist/PDFMaster-0.5.0-win64.zip` | Portable archive |
-| `dist/PDFMaster-0.5.0-Setup.exe` | NSIS installer |
+| `dist/PDFMaster-<version>-win64.zip` | Portable archive |
+| `dist/PDFMaster-<version>-Setup.exe` | NSIS installer |
 
 Scripts:
 
@@ -85,9 +87,9 @@ Scripts:
 ### Attach artifacts to a GitHub release
 
 ```powershell
-gh release upload v0.5.0 `
-  dist/PDFMaster-0.5.0-win64.zip `
-  dist/PDFMaster-0.5.0-Setup.exe `
+gh release upload v0.7.0 `
+  dist/PDFMaster-0.7.0-win64.zip `
+  dist/PDFMaster-0.7.0-Setup.exe `
   --clobber
 ```
 

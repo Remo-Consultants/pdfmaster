@@ -221,11 +221,38 @@ def test_info_panel_lists_and_deletes_markup(
 
 
 def test_panels_toggle_from_the_view_menu(main_window) -> None:
-    assert main_window._thumb_dock.isVisible()
-    main_window.toggle_thumbs_action.trigger()
     assert not main_window._thumb_dock.isVisible()
     main_window.toggle_thumbs_action.trigger()
     assert main_window._thumb_dock.isVisible()
+    main_window.toggle_thumbs_action.trigger()
+    assert not main_window._thumb_dock.isVisible()
+
+
+def test_welcome_home_shown_on_launch(main_window) -> None:
+    assert main_window._workspace.currentWidget() is main_window._welcome
+    assert main_window._ribbon.is_compact
+    assert not main_window._thumb_dock.isVisible()
+    assert not main_window._bookmarks_dock.isVisible()
+
+
+def test_opening_document_leaves_welcome(qtbot, main_window, make_pdf) -> None:
+    open_and_wait(qtbot, main_window, make_pdf(pages=1))
+    assert main_window._workspace.currentWidget() is main_window._tabs
+    assert not main_window._ribbon.is_compact
+    assert main_window._thumb_dock.isVisible()
+
+
+def test_ribbon_is_slim(main_window) -> None:
+    from src.ui.widgets.ribbon import RIBBON_COMPACT_HEIGHT, RIBBON_HEIGHT
+
+    assert main_window._ribbon.height() == RIBBON_COMPACT_HEIGHT
+    main_window._ribbon.set_compact(False)
+    assert main_window._ribbon.height() == RIBBON_HEIGHT
+
+
+def test_brand_accent_is_teal() -> None:
+    assert theme.color("accent", theme.LIGHT).lower() == "#0f766e"
+    assert theme.color("accent", theme.DARK).lower() == "#14b8a6"
 
 
 # ----------------------------------------------------------------------

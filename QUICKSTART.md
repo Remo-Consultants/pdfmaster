@@ -7,7 +7,9 @@ Setup.exe or the portable ZIP from
 [Releases](https://github.com/Remo-Consultants/pdfmaster/releases/latest),
 then skip to [First steps](#first-steps).
 
-**Product page:** https://remo-consultants.github.io/pdfmaster/
+**Product page:** https://remo-consultants.github.io/pdfmaster/  
+**Product reflection:** [`REFLECTION.md`](REFLECTION.md) — *The desk, not the cloud.*  
+**Press / media:** [`PRESS.md`](PRESS.md)
 
 This page covers the **from-source** path for developers. If you already
 have the app installed, skip to [First steps](#first-steps).
@@ -340,7 +342,8 @@ double-clicking a broken shortcut) so you can see the error.
 
 ## Next reading
 
-- [README.md](README.md) — full features, architecture, FAQ
+- [README.md](README.md) — full features, architecture, install
+- [REFLECTION.md](REFLECTION.md) — product manifesto & competitive positioning
 - `src/constants.py` — change window size, zoom limits, colors
 - `src/ui/main_window.py` — menus and ribbon
 - `src/ui/widgets/ribbon.py` — ribbon tabs and groups

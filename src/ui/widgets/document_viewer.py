@@ -69,9 +69,9 @@ FIT_MARGIN_PX = 8
 PAGE_GAP = 16
 PAGE_MARGIN = 16
 # Shadow is drawn as multiple layers for a soft, realistic look.
-SHADOW_LAYERS = 5
-SHADOW_BASE_OFFSET = 2
-SHADOW_SPREAD = 6
+SHADOW_LAYERS = 4
+SHADOW_BASE_OFFSET = 1
+SHADOW_SPREAD = 8
 # Minimum drag in device pixels before it counts as a selection.
 MIN_DRAG_PX = 3
 # Render this many screens beyond the viewport so scrolling stays smooth.
@@ -506,7 +506,7 @@ class DocumentViewer(QScrollArea):
         for i in range(SHADOW_LAYERS, 0, -1):
             # Each layer is larger and more transparent.
             spread = SHADOW_SPREAD * (i / SHADOW_LAYERS)
-            alpha = int(40 * (1 - (i - 1) / SHADOW_LAYERS))
+            alpha = int(28 * (1 - (i - 1) / SHADOW_LAYERS))
             offset = SHADOW_BASE_OFFSET + spread * 0.4
 
             shadow = QColor(base_color)
@@ -523,19 +523,15 @@ class DocumentViewer(QScrollArea):
 
     def _paint_paper_edge(self, painter: QPainter, rect: QRectF) -> None:
         """Subtle highlight on top/left edges for a 3D paper effect."""
-        # Light border around the page.
-        if self._scheme == "dark":
-            edge = QColor(80, 80, 80)
-        else:
-            edge = QColor(200, 200, 200)
+        edge = QColor(theme_color("page_border", self._scheme))
         painter.setPen(QPen(edge, 1))
         painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.drawRect(rect)
 
     def _paint_placeholder(self, painter: QPainter, rect: QRectF, page: int) -> None:
         """A blank sheet with a label, shown until the render lands."""
-        painter.fillRect(rect, QColor("#ffffff"))
-        painter.setPen(QPen(QColor("#9a9a9a")))
+        painter.fillRect(rect, QColor(theme_color("paper", self._scheme)))
+        painter.setPen(QPen(QColor(theme_color("muted", self._scheme))))
         font = QFont()
         font.setPointSize(10)
         painter.setFont(font)
@@ -543,7 +539,7 @@ class DocumentViewer(QScrollArea):
                          f"Rendering page {page + 1}...")
 
     def _paint_empty_message(self, painter: QPainter, widget: QWidget) -> None:
-        painter.setPen(QPen(QColor(theme_color("icon_disabled", self._scheme))))
+        painter.setPen(QPen(QColor(theme_color("muted", self._scheme))))
         font = QFont()
         font.setPointSize(11)
         painter.setFont(font)

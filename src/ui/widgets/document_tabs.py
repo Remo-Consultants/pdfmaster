@@ -118,6 +118,7 @@ class DocumentTabs(QTabWidget):
         self._scheme = scheme
         self._tabs: list[DocumentTab] = []
 
+        self.setObjectName("documentTabs")
         self.setTabsClosable(True)
         self.setMovable(True)
         self.setDocumentMode(True)

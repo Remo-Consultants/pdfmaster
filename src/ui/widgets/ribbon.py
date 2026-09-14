@@ -1,7 +1,7 @@
 """Ribbon-style toolbar with tabbed sections and labelled groups.
 
-Designed to look like commercial PDF tools (Adobe Acrobat, Foxit)
-while staying within Qt's widget system.
+Slim, icon-first command bar — keeps Acrobat-style tabs without the
+dense height tax of classic office ribbons.
 """
 
 from __future__ import annotations
@@ -23,6 +23,9 @@ from PySide6.QtWidgets import (
 
 from src.ui.theme import color as theme_color
 
+RIBBON_HEIGHT = 82
+RIBBON_COMPACT_HEIGHT = 72
+
 
 class RibbonGroup(QFrame):
     """A labelled group of controls within a ribbon tab."""
@@ -37,11 +40,11 @@ class RibbonGroup(QFrame):
         self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(8, 4, 8, 2)
-        layout.setSpacing(2)
+        layout.setContentsMargins(6, 2, 6, 2)
+        layout.setSpacing(1)
 
         self._content = QWidget()
-        self._content.setMinimumHeight(64)
+        self._content.setMinimumHeight(44)
         self._content_layout = QHBoxLayout(self._content)
         self._content_layout.setContentsMargins(0, 0, 0, 0)
         self._content_layout.setSpacing(2)
@@ -52,7 +55,7 @@ class RibbonGroup(QFrame):
 
         label = QLabel(title)
         label.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
-        label.setFixedHeight(14)
+        label.setFixedHeight(13)
         layout.addWidget(label)
         self._label = label
 
@@ -79,19 +82,19 @@ class RibbonGroup(QFrame):
             else:
                 caption = (action.iconText() or action.text()).replace("&", "")
 
-            btn.setIconSize(QSize(28, 28))
+            btn.setIconSize(QSize(22, 22))
             if caption:
                 btn.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
-                width = max(52, min(76, 10 + len(caption) * 7))
-                btn.setFixedSize(width, 62)
+                width = max(48, min(68, 8 + len(caption) * 6))
+                btn.setFixedSize(width, 48)
             else:
                 # Icon-only large button — same height as labelled neighbours.
                 btn.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
-                btn.setFixedSize(40, 62)
+                btn.setFixedSize(36, 48)
         else:
             btn.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
-            btn.setIconSize(QSize(22, 22))
-            btn.setFixedSize(34, 34)
+            btn.setIconSize(QSize(18, 18))
+            btn.setFixedSize(30, 30)
 
         self._apply_button_palette(btn)
         self._content_layout.addWidget(btn)
@@ -106,8 +109,11 @@ class RibbonGroup(QFrame):
         """Add a vertical separator line."""
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.VLine)
-        sep.setFrameShadow(QFrame.Shadow.Sunken)
+        sep.setFrameShadow(QFrame.Shadow.Plain)
         sep.setFixedWidth(1)
+        sep.setStyleSheet(
+            f"background-color: {theme_color('border', self._scheme)};"
+        )
         self._content_layout.addWidget(sep)
 
     def _apply_button_palette(self, btn: QToolButton) -> None:
@@ -130,7 +136,7 @@ class RibbonGroup(QFrame):
         self._scheme = scheme
         muted = theme_color("disabled_text", scheme)
         self._label.setStyleSheet(
-            f"font-size: 10px; color: {muted}; background: transparent;"
+            f"font-size: 9px; color: {muted}; background: transparent;"
         )
         for btn in self._buttons:
             self._apply_button_palette(btn)
@@ -142,9 +148,11 @@ class RibbonTab(QWidget):
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         self._groups: List[RibbonGroup] = []
+        self._separators: List[QFrame] = []
+        self._scheme = "light"
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(4, 2, 4, 2)
+        layout.setContentsMargins(4, 0, 4, 0)
         layout.setSpacing(0)
         layout.addStretch(1)
         self._layout = layout
@@ -156,8 +164,11 @@ class RibbonTab(QWidget):
             sep.setFrameShape(QFrame.Shape.VLine)
             sep.setFrameShadow(QFrame.Shadow.Plain)
             sep.setFixedWidth(1)
-            sep.setStyleSheet("background-color: #555555;")
+            sep.setStyleSheet(
+                f"background-color: {theme_color('border', self._scheme)};"
+            )
             self._layout.insertWidget(self._layout.count() - 1, sep)
+            self._separators.append(sep)
 
         group = RibbonGroup(title, self)
         self._layout.insertWidget(self._layout.count() - 1, group)
@@ -166,6 +177,10 @@ class RibbonTab(QWidget):
 
     def apply_scheme(self, scheme: str) -> None:
         """Update colours for the current theme."""
+        self._scheme = scheme
+        border = theme_color("border", scheme)
+        for sep in self._separators:
+            sep.setStyleSheet(f"background-color: {border};")
         for group in self._groups:
             group.apply_scheme(scheme)
 
@@ -178,7 +193,9 @@ class Ribbon(QWidget):
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         self._tabs: Dict[str, RibbonTab] = {}
+        self._tab_indices: Dict[str, int] = {}
         self._scheme = "light"
+        self._compact = False
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -190,18 +207,37 @@ class Ribbon(QWidget):
         self._tab_widget.currentChanged.connect(self.current_tab_changed.emit)
         layout.addWidget(self._tab_widget)
 
-        self.setFixedHeight(118)
+        self.setFixedHeight(RIBBON_HEIGHT)
 
     def add_tab(self, name: str, title: str) -> RibbonTab:
         """Add a tab to the ribbon."""
         tab = RibbonTab()
         self._tabs[name] = tab
-        self._tab_widget.addTab(tab, title)
+        idx = self._tab_widget.addTab(tab, title)
+        self._tab_indices[name] = idx
         return tab
 
     def get_tab(self, name: str) -> Optional[RibbonTab]:
         """Get a tab by its internal name."""
         return self._tabs.get(name)
+
+    def set_compact(self, compact: bool) -> None:
+        """Home-only essentials when no document is open."""
+        if compact == self._compact:
+            return
+        self._compact = compact
+        self.setFixedHeight(RIBBON_COMPACT_HEIGHT if compact else RIBBON_HEIGHT)
+        for name, idx in self._tab_indices.items():
+            if name == "home":
+                continue
+            self._tab_widget.setTabVisible(idx, not compact)
+        if compact:
+            home_idx = self._tab_indices.get("home", 0)
+            self._tab_widget.setCurrentIndex(home_idx)
+
+    @property
+    def is_compact(self) -> bool:
+        return self._compact
 
     def apply_scheme(self, scheme: str) -> None:
         """Update colours for the current theme."""
@@ -209,6 +245,7 @@ class Ribbon(QWidget):
         bg = theme_color("window", scheme)
         border = theme_color("border", scheme)
         text = theme_color("window_text", scheme)
+        muted = theme_color("muted", scheme)
         accent = theme_color("accent", scheme)
         hover = theme_color("hover", scheme)
 
@@ -226,18 +263,22 @@ class Ribbon(QWidget):
             }}
             QTabBar::tab {{
                 background: transparent;
-                color: {text};
-                padding: 6px 14px;
+                color: {muted};
+                padding: 5px 12px;
                 border: none;
                 border-bottom: 2px solid transparent;
                 margin-right: 1px;
+                border-top-left-radius: 6px;
+                border-top-right-radius: 6px;
             }}
             QTabBar::tab:hover {{
                 background: {hover};
+                color: {text};
             }}
             QTabBar::tab:selected {{
+                color: {text};
                 border-bottom: 2px solid {accent};
-                font-weight: bold;
+                font-weight: 600;
             }}
             RibbonGroup {{
                 background: transparent;

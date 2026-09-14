@@ -3,8 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PDFMaster — Desktop PDF viewer &amp; editor</title>
-  <meta name="description" content="PDFMaster is a professional Windows PDF viewer and editor. Files stay on your PC. Ribbon workspace, markup, security, and batch tools." />
+  <title>PDFMaster — The desk, not the cloud</title>
+  <meta name="description" content="PDFMaster is a commercial-grade, offline-first PDF viewer and editor for Windows. Ribbon workspace, true redaction, compare, security, and batch — MIT licensed. Files stay on your PC." />
+  <meta property="og:title" content="PDFMaster — The desk, not the cloud" />
+  <meta property="og:description" content="Professional Windows PDF workspace. Offline-first. MIT. Built to compete on craft and ownership." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
@@ -151,14 +155,30 @@
     }
     .titlebar {
       display: flex;
-      gap: 6px;
+      align-items: center;
+      gap: 8px;
       padding: 0.65rem 0.8rem;
       background: #e2e8f0;
     }
     .dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; }
+    .win-title {
+      margin-left: auto;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--slate);
+      letter-spacing: 0.02em;
+    }
+    .mock-caption {
+      margin: 0.85rem 0 0;
+      font-size: 0.8rem;
+      color: rgba(248, 250, 252, 0.75);
+      text-align: center;
+      max-width: 22rem;
+      margin-inline: auto;
+    }
     .ribbon {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 0.35rem;
       padding: 0.6rem;
       background: white;
@@ -262,6 +282,49 @@
       margin-bottom: 0.55rem;
     }
 
+    .manifesto {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 1.5rem;
+      align-items: stretch;
+    }
+    .quote-panel {
+      background: linear-gradient(160deg, #0f172a 0%, #134e4a 100%);
+      color: #e2e8f0;
+      border-radius: var(--radius);
+      padding: 2rem 2.1rem;
+      box-shadow: var(--shadow);
+    }
+    .quote-panel blockquote {
+      margin: 0;
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(1.6rem, 3vw, 2.1rem);
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      color: #f8fafc;
+    }
+    .quote-panel p {
+      margin: 1.25rem 0 0;
+      color: #99f6e4;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .compare-panel {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .compare-panel h3 { margin: 0 0 0.75rem; }
+    .compare-panel ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: var(--slate);
+    }
+    .compare-panel li { margin: 0.45rem 0; }
+
     .install {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -290,6 +353,14 @@
       line-height: 1.5;
     }
     code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+    kbd {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.85em;
+      padding: 0.1em 0.4em;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8fafc;
+    }
 
     .arch {
       background: white;
@@ -321,6 +392,27 @@
     th { background: #f8fafc; color: var(--slate); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
     tr:last-child td { border-bottom: 0; }
 
+    .cta-band {
+      margin: 1rem 0 2rem;
+      padding: 2rem;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, #ccfbf1 0%, #e0f2fe 55%, #f8fafc 100%);
+      border: 1px solid #99f6e4;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .cta-band h2 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-weight: 400;
+      font-size: 1.9rem;
+      margin: 0 0 0.35rem;
+      letter-spacing: -0.02em;
+    }
+    .cta-band p { margin: 0; color: var(--slate); max-width: 28rem; }
+
     footer {
       border-top: 1px solid var(--line);
       padding: 2rem 0 3rem;
@@ -336,7 +428,7 @@
     }
 
     @media (max-width: 860px) {
-      .hero, .install, .grid-3 { grid-template-columns: 1fr; }
+      .hero, .install, .grid-3, .manifesto { grid-template-columns: 1fr; }
       .stage { min-height: 280px; }
       .nav-links { display: none; }
     }
@@ -346,36 +438,42 @@
   <div class="wrap">
     <nav class="nav" aria-label="Primary">
       <a class="brand" href="#top">
-        <img src="assets/pdfmaster.png" alt="" width="36" height="36" />
+        <img src="assets/mark.svg" alt="" width="36" height="36" />
         PDFMaster
       </a>
       <div class="nav-links">
+        <a href="#why">Why</a>
         <a href="#install">Install</a>
         <a href="#features">Features</a>
         <a href="#architecture">Architecture</a>
+        <a href="https://github.com/Remo-Consultants/pdfmaster/blob/main/REFLECTION.md">Reflection</a>
+        <a href="https://github.com/Remo-Consultants/pdfmaster/blob/main/PRESS.md">Press</a>
         <a href="https://github.com/Remo-Consultants/pdfmaster">GitHub</a>
       </div>
     </nav>
 
     <header class="hero" id="top">
       <div>
-        <div class="eyebrow">Windows · v0.7.0 · Offline-first</div>
-        <h1>Read, mark up, and ship PDFs without leaving your desk.</h1>
+        <div class="eyebrow">Windows · v0.8.1 · Offline-first · MIT</div>
+        <h1>The desk, not the cloud.</h1>
         <p class="lede">
-          PDFMaster is a native desktop viewer and editor with a commercial ribbon workspace,
-          multi-document tabs, and tools for search, OCR, security, and batch work.
-          Your files stay on your machine.
+          PDFMaster is a commercial-grade PDF viewer and editor for Windows —
+          ribbon workspace, true redaction, compare, security, and batch —
+          with a single non-negotiable: <strong>your files stay on your machine</strong>.
         </p>
         <div class="cta-row">
           <a class="btn btn-primary" href="https://github.com/Remo-Consultants/pdfmaster/releases/latest">Download release</a>
-          <a class="btn btn-secondary" href="#install">Install options</a>
+          <a class="btn btn-secondary" href="https://github.com/Remo-Consultants/pdfmaster/blob/main/REFLECTION.md">Read the reflection</a>
         </div>
       </div>
       <div class="stage" aria-hidden="true">
         <div class="window">
-          <div class="titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="titlebar">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="win-title">PDFMaster 0.8.1</span>
+          </div>
           <div class="ribbon">
-            <span class="active">Home</span><span>Markup</span><span>Edit</span><span>Organize</span><span>View</span>
+            <span>Home</span><span>Markup</span><span>Edit</span><span>Organize</span><span class="active">Review</span><span>View</span>
           </div>
           <div class="canvas">
             <div class="thumbs"><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div></div>
@@ -387,8 +485,35 @@
             </div>
           </div>
         </div>
+        <p class="mock-caption">Same ribbon tabs as the desktop app — not a separate web UI. Install PDFMaster to use the real workspace.</p>
       </div>
     </header>
+
+    <section id="why">
+      <div class="section-head">
+        <h2>Built to stand beside the giants</h2>
+        <p>
+          Adobe and Foxit set the bar for PDF craft. PDFMaster competes on ownership,
+          privacy, and an interface that finishes the job without a subscription wall.
+        </p>
+      </div>
+      <div class="manifesto">
+        <div class="quote-panel">
+          <blockquote>Open source can look and feel like a product people pay for — without asking them to surrender the file.</blockquote>
+          <p>Product reflection · Remo Consultants</p>
+        </div>
+        <div class="compare-panel">
+          <h3>What you keep</h3>
+          <ul>
+            <li><strong>Local by design</strong> — no account, no silent sync</li>
+            <li><strong>True redaction</strong> — content removed, not painted over</li>
+            <li><strong>Commercial ribbon</strong> — Home · Markup · Edit · Organize · Review · View</li>
+            <li><strong>MIT license</strong> — read it, ship it, own the workflow</li>
+            <li><strong>Honest scope</strong> — compare is text-first; PDF/A is desktop inspection</li>
+          </ul>
+        </div>
+      </div>
+    </section>
 
     <section id="install">
       <div class="section-head">
@@ -439,9 +564,12 @@ python installer/build_installer.py --clean --nsis</code></pre>
         <p>One composition: ribbon, document tabs, continuous pages, and focused docks.</p>
       </div>
       <div class="grid-3">
-        <article class="card"><div class="kicker">Workspace</div><h3>Ribbon + tabs</h3><p>Home, Markup, Edit, Organize, View. Open several PDFs; each tab keeps zoom, page, and undo history.</p></article>
-        <article class="card"><div class="kicker">Markup</div><h3>Highlight to redact</h3><p>Text markup, notes, pen, shapes, watermarks, stamps, find/replace, forms, flatten, and true redaction — with undo.</p></article>
-        <article class="card"><div class="kicker">Phase 3+</div><h3>Search · Compare · PDF/A</h3><p>Document search, OCR, batch jobs, text compare against another PDF, and a desktop PDF/A declaration check.</p></article>
+        <article class="card"><div class="kicker">Workspace</div><h3>Ribbon + tabs</h3><p>Home, Markup, Edit, Organize, <strong>Review</strong>, View — matching the Windows app. Multi-document tabs keep zoom, page, and undo per file.</p></article>
+        <article class="card"><div class="kicker">Review</div><h3>Compare on the ribbon</h3><p>Search, OCR, batch, document compare (text + optional visual similarity), and PDF/A check — large buttons on the Review tab, not buried in menus.</p></article>
+        <article class="card"><div class="kicker">Markup</div><h3>Highlight to redact</h3><p>Text markup, notes, pen, shapes, labelled Watermark &amp; Stamp buttons, find/replace, forms, flatten, and true redaction — with undo.</p></article>
+        <article class="card"><div class="kicker">Security</div><h3>AES on your terms</h3><p>Password-protect or unlock a copy. Security info stays on the desk — encryption never requires an account.</p></article>
+        <article class="card"><div class="kicker">Organize</div><h3>Pages under control</h3><p>Reorder, rotate, duplicate, insert blanks, import pages, print with preview, export PNG/JPEG up to 600 dpi.</p></article>
+        <article class="card"><div class="kicker">Craft</div><h3>Theme that follows you</h3><p>System light/dark, soft page shadows, HiDPI SVG icons — commercial density without cruelty.</p></article>
       </div>
     </section>
 
@@ -453,7 +581,7 @@ python installer/build_installer.py --clean --nsis</code></pre>
       <div class="arch">
         <div class="layers">
           <div class="layer ui"><strong>UI — PySide6</strong><span>MainWindow · Ribbon · DocumentTabs · DocumentViewer · docks · dialogs · EditController</span></div>
-          <div class="layer services"><strong>Services &amp; processors</strong><span>Annotations · content · page ops · print/export · OCR · security · batch · history</span></div>
+          <div class="layer services"><strong>Services &amp; processors</strong><span>Annotations · content · page ops · print/export · OCR · security · batch · compare · PDF/A · history</span></div>
           <div class="layer core"><strong>Core</strong><span>Document (locked fitz handle) · PDFHandler · render workers + cache</span></div>
           <div class="layer utils"><strong>Foundation</strong><span>FileHandler · exceptions · logger · theme · HiDPI SVG icons · constants</span></div>
         </div>
@@ -480,10 +608,27 @@ python installer/build_installer.py --clean --nsis</code></pre>
       </div>
     </section>
 
+    <div class="cta-band">
+      <div>
+        <h2>Own the PDF again.</h2>
+        <p>Download the Windows release, or read the product reflection for the full competitive thesis.</p>
+      </div>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://github.com/Remo-Consultants/pdfmaster/releases/latest">Get PDFMaster</a>
+        <a class="btn btn-secondary" href="https://github.com/Remo-Consultants/pdfmaster/blob/main/README.md">Full README</a>
+      </div>
+    </div>
+
     <footer>
       <div class="row">
-        <div>PDFMaster 0.7.0 · MIT License · <a href="https://github.com/Remo-Consultants/pdfmaster">Remo-Consultants/pdfmaster</a></div>
-        <div><a href="https://github.com/Remo-Consultants/pdfmaster#readme">Full README</a> · <a href="https://github.com/Remo-Consultants/pdfmaster/blob/main/QUICKSTART.md">Quick start</a></div>
+        <div>PDFMaster 0.8.1 · MIT License · <a href="https://github.com/Remo-Consultants/pdfmaster">Remo-Consultants/pdfmaster</a><br/>
+          Independent — not affiliated with Adobe, Foxit, Microsoft, or the PDF Association.</div>
+        <div>
+          <a href="https://github.com/Remo-Consultants/pdfmaster/blob/main/REFLECTION.md">Reflection</a> ·
+          <a href="https://github.com/Remo-Consultants/pdfmaster/blob/main/PRESS.md">Press kit</a> ·
+          <a href="https://github.com/Remo-Consultants/pdfmaster#readme">README</a> ·
+          <a href="https://github.com/Remo-Consultants/pdfmaster/blob/main/QUICKSTART.md">Quick start</a>
+        </div>
       </div>
     </footer>
   </div>

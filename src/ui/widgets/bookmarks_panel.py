@@ -44,9 +44,10 @@ class BookmarksPanel(QWidget):
         self._tree.itemDoubleClicked.connect(self._on_item_clicked)
         layout.addWidget(self._tree)
 
-        self._no_outline_label = QLabel("No outline available")
+        self._no_outline_label = QLabel("This PDF has no outline")
         self._no_outline_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._no_outline_label.setStyleSheet("color: #888;")
+        self._no_outline_label.setWordWrap(True)
+        self._no_outline_label.setStyleSheet("color: #94a3b8; padding: 16px;")
         layout.addWidget(self._no_outline_label)
 
         self._tree.hide()

@@ -133,6 +133,42 @@ ACTION_SVGS: Dict[str, str] = {
         '<rect fill="none" stroke="{ink}" stroke-width="1.8" x="4" y="3" width="16" height="18" rx="1.5"/>',
         '<path fill="none" stroke="{accent}" stroke-width="1.8" stroke-linecap="round" d="M7 8h10M7 12h10M7 16h6"/>',
     ),
+    "search": _svg(
+        '<circle fill="none" stroke="{ink}" stroke-width="2" cx="10" cy="10" r="6"/>',
+        '<path fill="none" stroke="{ink}" stroke-width="2.2" stroke-linecap="round" d="M15 15 20 20"/>',
+        '<path fill="none" stroke="{accent}" stroke-width="1.8" stroke-linecap="round" d="M7.5 10h5"/>',
+    ),
+    "watermark": _svg(
+        '<rect fill="none" stroke="{ink}" stroke-width="1.8" x="6" y="4" width="12" height="16" rx="1.2"/>',
+        '<path fill="none" stroke="{accent}" stroke-width="1.6" stroke-linecap="round" '
+        'd="M8 9h8M8 12h8M8 15h6" opacity="0.55"/>',
+        '<path fill="{accent}" d="M9 7h6l-1 2H10l-1-2Z" opacity="0.85"/>',
+    ),
+    "stamp": _svg(
+        '<rect fill="none" stroke="{ink}" stroke-width="1.8" x="5" y="5" width="14" height="14" rx="2"/>',
+        '<path fill="{accent}" d="M8 11h8v2H8v-2Z"/>',
+        '<path fill="none" stroke="{accent}" stroke-width="1.8" stroke-linecap="round" d="M9 8h6"/>',
+    ),
+    "compare": _svg(
+        '<rect fill="{ink}" x="3" y="5" width="8" height="14" rx="1.2"/>',
+        '<rect fill="{accent}" x="13" y="5" width="8" height="14" rx="1.2"/>',
+        '<path fill="none" stroke="{ink}" stroke-width="2" stroke-linecap="round" d="M11.5 9v6"/>',
+    ),
+    "pdfa": _svg(
+        '<rect fill="none" stroke="{ink}" stroke-width="1.8" x="4" y="3" width="16" height="18" rx="1.5"/>',
+        '<path fill="{accent}" d="M7 8h4.2l1.2 3.5L14 8h3l-3.8 10h-2.4L7 8Z"/>',
+        '<path fill="none" stroke="{accent}" stroke-width="1.6" stroke-linecap="round" d="M7 17h10"/>',
+    ),
+    "batch": _svg(
+        '<rect fill="{ink}" x="3" y="6" width="9" height="12" rx="1.2"/>',
+        '<rect fill="{accent}" x="12" y="6" width="9" height="12" rx="1.2"/>',
+        '<path fill="none" stroke="{ink}" stroke-width="1.8" stroke-linecap="round" d="M7.5 12h9"/>',
+    ),
+    "ocr": _svg(
+        '<rect fill="none" stroke="{ink}" stroke-width="1.8" x="4" y="5" width="16" height="14" rx="1.5"/>',
+        '<path fill="{accent}" d="M7 10h2v4H7v-4Zm4 0h2v4h-2v-4Zm4 0h2v4h-2v-4Z"/>',
+        '<path fill="none" stroke="{accent}" stroke-width="1.6" stroke-linecap="round" d="M7 16h10"/>',
+    ),
 }
 
 
@@ -199,6 +235,7 @@ TOOL_SVGS: Dict[ToolMode, str] = {
 # Rasterisation
 # ----------------------------------------------------------------------
 def _coloured_svg(template: str, scheme: str, accent_override: Optional[str]) -> bytes:
+    # Ink/accent come from the quiet-paper theme tokens (teal brand accent).
     ink = theme_color("icon", scheme)
     accent = accent_override or theme_color("accent", scheme)
     return template.format(ink=ink, accent=accent).encode("utf-8")

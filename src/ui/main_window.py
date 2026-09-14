@@ -26,6 +26,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QSlider,
     QSpinBox,
+    QStackedWidget,
     QStatusBar,
     QVBoxLayout,
     QWidget,
@@ -54,7 +55,6 @@ from src.constants import (
     MSG_SAVE_SUCCESS,
     PDF_FILTER,
     SHORTCUTS,
-    STATUS_READY,
     WINDOW_HEIGHT,
     WINDOW_MIN_HEIGHT,
     WINDOW_MIN_WIDTH,
@@ -88,6 +88,7 @@ from src.ui.widgets.info_panel import InfoPanel
 from src.ui.widgets.ribbon import Ribbon
 from src.ui.widgets.text_extract_panel import TextExtractPanel
 from src.ui.widgets.thumbnail_panel import ThumbnailPanel
+from src.ui.widgets.welcome_home import WelcomeHome
 from src.services.security_service import SecurityService
 from src.utils.exceptions import (
     FileOperationError,
@@ -109,7 +110,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self._updating_ui = False
 
-        self.setWindowTitle(APP_NAME)
+        self.setWindowTitle(self._format_window_title())
         if APP_ICON_PATH.is_file():
             self.setWindowIcon(QIcon(str(APP_ICON_PATH)))
         self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -121,7 +122,7 @@ class MainWindow(QMainWindow):
 
         self._scheme = detect_scheme()
 
-        # Central widget: ribbon + tabbed documents stacked vertically.
+        # Central widget: ribbon + (welcome | document tabs).
         central = QWidget()
         central_layout = QVBoxLayout(central)
         central_layout.setContentsMargins(0, 0, 0, 0)
@@ -130,12 +131,21 @@ class MainWindow(QMainWindow):
         self._ribbon = Ribbon(self)
         central_layout.addWidget(self._ribbon)
 
+        self._workspace = QStackedWidget(self)
+        self._welcome = WelcomeHome(self._scheme, self)
+        self._welcome.open_requested.connect(self.open_file)
+        self._welcome.path_requested.connect(self.open_file)
         self._tabs = DocumentTabs(self._scheme, self)
-        central_layout.addWidget(self._tabs, 1)
+        self._tabs.setObjectName("documentTabs")
+        self._workspace.addWidget(self._welcome)
+        self._workspace.addWidget(self._tabs)
+        self._workspace.setCurrentWidget(self._welcome)
+        central_layout.addWidget(self._workspace, 1)
         self.setCentralWidget(central)
 
         self._tabs.active_tab_changed.connect(self._on_tab_changed)
         self._tabs.tab_count_changed.connect(self._on_tab_count_changed)
+        self._docks_auto_shown = False
 
         self.editor = EditController(self)
 
@@ -157,7 +167,22 @@ class MainWindow(QMainWindow):
         self._set_document_actions_enabled(False)
         self._reload_recent_menu()
         self.update_history_actions()
+        self._ribbon.set_compact(True)
+        self._sync_empty_workspace()
+        self.statusBar().showMessage(
+            f"Use the Review tab for Compare, PDF/A, Search, and Batch — {APP_NAME} {APP_VERSION}",
+            12000,
+        )
         logger.info("Main window created")
+
+    def _format_window_title(self, document_name: str = "") -> str:
+        """Window title always includes the app version so builds are easy to verify."""
+        base = f"{APP_NAME} {APP_VERSION}"
+        return f"{document_name} — {base}" if document_name else base
+
+    def _assign_action_icon(self, icon_name: str, action: QAction) -> None:
+        action.setIcon(action_icon(icon_name, self._scheme))
+        self._icon_actions[icon_name] = action
 
     # ------------------------------------------------------------------
     # Theming
@@ -182,6 +207,7 @@ class MainWindow(QMainWindow):
         clear_cache()
         self._tabs.apply_scheme(scheme)
         self._ribbon.apply_scheme(scheme)
+        self._welcome.apply_scheme(scheme)
         self._retheme_icons()
 
     def _retheme_icons(self) -> None:
@@ -666,17 +692,13 @@ class MainWindow(QMainWindow):
         select_grp = markup.add_group("Select")
         select_grp.add_action(self._tool_actions[ToolMode.PAN], large=True, label="")
 
-        # Text Markup — every tool gets a short caption.
+        # Primary markup stays large; secondary tools are icon-only.
         text_markup_grp = markup.add_group("Text Markup")
         text_markup_grp.add_action(
             self._tool_actions[ToolMode.HIGHLIGHT], large=True, label="Highlight"
         )
-        text_markup_grp.add_action(
-            self._tool_actions[ToolMode.UNDERLINE], large=True, label="Underline"
-        )
-        text_markup_grp.add_action(
-            self._tool_actions[ToolMode.STRIKEOUT], large=True, label="Strikeout"
-        )
+        text_markup_grp.add_action(self._tool_actions[ToolMode.UNDERLINE], large=False)
+        text_markup_grp.add_action(self._tool_actions[ToolMode.STRIKEOUT], large=False)
 
         shapes_grp = markup.add_group("Shapes")
         shapes_grp.add_action(self._tool_actions[ToolMode.PEN], large=True, label="Pen")
@@ -686,11 +708,10 @@ class MainWindow(QMainWindow):
 
         notes_grp = markup.add_group("Notes")
         notes_grp.add_action(self._tool_actions[ToolMode.NOTE], large=True, label="Note")
-        notes_grp.add_action(
-            self._tool_actions[ToolMode.DELETE_ANNOT], large=True, label="Delete"
-        )
+        notes_grp.add_action(self._tool_actions[ToolMode.DELETE_ANNOT], large=False)
 
         stamp_grp = markup.add_group("Stamp")
+        self._wire_phase_tool_icons()
         if hasattr(self, "watermark_action"):
             stamp_grp.add_action(self.watermark_action, large=True, label="Watermark")
         if hasattr(self, "stamp_action"):
@@ -721,9 +742,7 @@ class MainWindow(QMainWindow):
         )
 
         remove_grp = edit_tab.add_group("Remove")
-        remove_grp.add_action(
-            self._tool_actions[ToolMode.ERASE], large=True, label="Erase"
-        )
+        remove_grp.add_action(self._tool_actions[ToolMode.ERASE], large=False)
         remove_grp.add_action(
             self._tool_actions[ToolMode.REDACT], large=True, label="Redact"
         )
@@ -757,6 +776,27 @@ class MainWindow(QMainWindow):
         rotate_grp.add_action(rotate_cw_action, large=True, label="Right")
         self._icon_actions["rotate_cw"] = rotate_cw_action
 
+        # --- REVIEW TAB (Compare, PDF/A, search, batch — visible on the ribbon) ---
+        review_tab = ribbon.add_tab("review", "Review")
+
+        find_grp = review_tab.add_group("Find")
+        if hasattr(self, "search_action"):
+            find_grp.add_action(self.search_action, large=True, label="Search")
+        if hasattr(self, "ocr_action"):
+            find_grp.add_action(self.ocr_action, large=True, label="OCR")
+        if hasattr(self, "extract_text_action"):
+            find_grp.add_action(self.extract_text_action, large=False)
+
+        compare_grp = review_tab.add_group("Compare")
+        if hasattr(self, "compare_action"):
+            compare_grp.add_action(self.compare_action, large=True, label="Compare")
+        if hasattr(self, "pdfa_action"):
+            compare_grp.add_action(self.pdfa_action, large=True, label="PDF/A")
+
+        workflow_grp = review_tab.add_group("Workflow")
+        if hasattr(self, "batch_action"):
+            workflow_grp.add_action(self.batch_action, large=True, label="Batch")
+
         # --- VIEW TAB ---
         view_tab = ribbon.add_tab("view", "View")
 
@@ -767,6 +807,22 @@ class MainWindow(QMainWindow):
         panels_grp.add_action(self.toggle_info_action, large=True, label="Props")
         self._icon_actions["sidebar"] = self.toggle_thumbs_action
         self._icon_actions["panel"] = self.toggle_info_action
+
+    def _wire_phase_tool_icons(self) -> None:
+        """Icons for Tools-menu actions that also appear on the Review / Markup ribbon."""
+        mapping = (
+            ("search", "search_action"),
+            ("ocr", "ocr_action"),
+            ("batch", "batch_action"),
+            ("watermark", "watermark_action"),
+            ("stamp", "stamp_action"),
+            ("compare", "compare_action"),
+            ("pdfa", "pdfa_action"),
+        )
+        for icon_name, attr in mapping:
+            action = getattr(self, attr, None)
+            if action is not None:
+                self._assign_action_icon(icon_name, action)
 
     def create_docks(self) -> None:
         """Create the thumbnail sidebar, bookmarks, text extract, and properties panels."""
@@ -793,6 +849,9 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self._bookmarks_dock)
         self.tabifyDockWidget(self._thumb_dock, self._bookmarks_dock)
         self._thumb_dock.raise_()
+        # Progressive disclosure: hide side chrome until a document is open.
+        self._thumb_dock.hide()
+        self._bookmarks_dock.hide()
 
         self.info_panel = InfoPanel(self)
         self.info_panel.delete_requested.connect(self._on_delete_annotation)
@@ -817,7 +876,7 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._text_extract_dock)
         self._text_extract_dock.hide()
 
-        self.toggle_thumbs_action.setChecked(True)
+        self.toggle_thumbs_action.setChecked(False)
         self.toggle_info_action.setChecked(False)
         self._thumb_dock.visibilityChanged.connect(
             lambda visible: self.toggle_thumbs_action.setChecked(visible)
@@ -844,7 +903,32 @@ class MainWindow(QMainWindow):
         """Create the status bar used for operation feedback."""
         status = QStatusBar()
         self.setStatusBar(status)
-        status.showMessage(STATUS_READY)
+        status.showMessage("Open a PDF to begin")
+
+    def _sync_empty_workspace(self) -> None:
+        """Show welcome home when no tabs remain; document surface otherwise."""
+        has_docs = self._tabs.count() > 0
+        if has_docs:
+            self._workspace.setCurrentWidget(self._tabs)
+            self._ribbon.set_compact(False)
+            if not self._docks_auto_shown:
+                self._thumb_dock.show()
+                self._thumb_dock.raise_()
+                self.toggle_thumbs_action.setChecked(True)
+                self._docks_auto_shown = True
+        else:
+            self._workspace.setCurrentWidget(self._welcome)
+            self._ribbon.set_compact(True)
+            self._welcome.refresh_recents()
+            self._thumb_dock.hide()
+            self._bookmarks_dock.hide()
+            self._info_dock.hide()
+            self._text_extract_dock.hide()
+            self.toggle_thumbs_action.setChecked(False)
+            self.toggle_info_action.setChecked(False)
+            self._docks_auto_shown = False
+            if self.statusBar() is not None:
+                self.statusBar().showMessage("Open a PDF to begin")
 
     # ------------------------------------------------------------------
     # File operations
@@ -897,7 +981,7 @@ class MainWindow(QMainWindow):
         self.editor.reset()
         self.set_tool(ToolMode.PAN)
         self._set_document_actions_enabled(True)
-        self.setWindowTitle(f"{document.filename} — {APP_NAME}")
+        self.setWindowTitle(self._format_window_title(document.filename))
         self.statusBar().showMessage(
             MSG_OPEN_SUCCESS.format(filename=document.filename, pages=document.page_count)
         )
@@ -908,6 +992,7 @@ class MainWindow(QMainWindow):
         self._reload_recent_menu()
         self.update_page_info()
         self.update_zoom_display()
+        self._sync_empty_workspace()
         logger.info("UI opened %s", document.filename)
 
         if document.was_repaired:
@@ -932,7 +1017,7 @@ class MainWindow(QMainWindow):
                 self._show_error("Save failed", str(exc) or MSG_SAVE_ERROR)
                 return
         self.statusBar().showMessage(MSG_SAVE_SUCCESS.format(filename=saved.name))
-        self.setWindowTitle(f"{saved.name} — {APP_NAME}")
+        self.setWindowTitle(self._format_window_title(saved.name))
 
     def save_file_as(self) -> None:
         """Save the open document to a user-chosen path."""
@@ -949,7 +1034,7 @@ class MainWindow(QMainWindow):
             self._show_error("Save failed", str(exc) or MSG_SAVE_ERROR)
             return
         self.statusBar().showMessage(MSG_SAVE_SUCCESS.format(filename=saved.name))
-        self.setWindowTitle(f"{saved.name} — {APP_NAME}")
+        self.setWindowTitle(self._format_window_title(saved.name))
 
     def _reload_recent_menu(self) -> None:
         if self._recent_menu is None:
@@ -963,11 +1048,12 @@ class MainWindow(QMainWindow):
             empty = QAction("(None)", self)
             empty.setEnabled(False)
             self._recent_menu.addAction(empty)
-            return
-        for item in recent:
-            action = QAction(item, self)
-            action.triggered.connect(lambda _checked=False, p=item: self.open_file(p))
-            self._recent_menu.addAction(action)
+        else:
+            for item in recent:
+                action = QAction(item, self)
+                action.triggered.connect(lambda _checked=False, p=item: self.open_file(p))
+                self._recent_menu.addAction(action)
+        self._welcome.refresh_recents()
 
     # ------------------------------------------------------------------
     # Tab management
@@ -1000,7 +1086,7 @@ class MainWindow(QMainWindow):
             self.info_panel.set_document(None)
             self.text_extract_panel.set_document(None)
             self._set_document_actions_enabled(False)
-            self.setWindowTitle(APP_NAME)
+            self.setWindowTitle(self._format_window_title())
             self.update_page_info(0)
             return
 
@@ -1012,7 +1098,7 @@ class MainWindow(QMainWindow):
             self.info_panel.set_document(doc)
             self.text_extract_panel.set_document(doc)
             self._set_document_actions_enabled(True)
-            self.setWindowTitle(f"{doc.filename} — {APP_NAME}")
+            self.setWindowTitle(self._format_window_title(doc.filename))
             self.update_page_info(self.viewer.current_page if self.viewer else 0)
             self.update_zoom_display(self.viewer.zoom_level if self.viewer else 1.0)
             self.update_history_actions()
@@ -1020,6 +1106,7 @@ class MainWindow(QMainWindow):
     def _on_tab_count_changed(self, count: int) -> None:
         """Update UI when tabs are opened/closed."""
         self._set_document_actions_enabled(count > 0)
+        self._sync_empty_workspace()
 
     # ------------------------------------------------------------------
     # Navigation / zoom / rotate
