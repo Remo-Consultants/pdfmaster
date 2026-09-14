@@ -4,7 +4,7 @@
 
 **Tagline:** *The desk, not the cloud.*
 
-**Version:** 0.8.2  
+**Version:** 0.9.0  
 **License:** MIT  
 **Platform:** Windows 10/11 (64-bit); source runs on Linux/macOS  
 **Organization:** [Remo Consultants](https://github.com/Remo-Consultants)  

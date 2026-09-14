@@ -84,7 +84,7 @@ class WelcomeHome(QWidget):
         card_layout.addWidget(self._version)
 
         self._features = QLabel(
-            "Review tab — Compare · PDF/A · Search · Batch  ·  Markup — Watermark · Stamp"
+            "Sidebar — Home · Markup · Edit · Organize · Review · View"
         )
         self._features.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._features.setWordWrap(True)

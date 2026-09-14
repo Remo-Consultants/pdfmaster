@@ -34,16 +34,32 @@ def _canvas_point(viewer, page: int, pdf_x: float, pdf_y: float) -> QPointF:
 
 
 # ----------------------------------------------------------------------
-# Ribbon layout
+# Sidebar shell + context rail
 # ----------------------------------------------------------------------
 def test_ribbon_has_expected_tabs(main_window) -> None:
-    """The ribbon should have Home, Markup, Edit, Organize, View tabs."""
+    """Context rail still exposes Home, Markup, Edit, Organize, Review, View."""
     ribbon = main_window._ribbon
     assert ribbon.get_tab("home") is not None
     assert ribbon.get_tab("markup") is not None
     assert ribbon.get_tab("edit") is not None
     assert ribbon.get_tab("organize") is not None
+    assert ribbon.get_tab("review") is not None
     assert ribbon.get_tab("view") is not None
+
+
+def test_sidebar_drives_context_rail_mode(qtbot, main_window, make_pdf) -> None:
+    """Sidebar is the mode switcher; the context rail follows."""
+    sidebar = main_window._sidebar
+    assert sidebar.objectName() == "appSidebar"
+    open_and_wait(qtbot, main_window, make_pdf(pages=1))
+    sidebar.set_mode("markup")
+    assert main_window._ribbon.current_mode == "markup"
+    sidebar.set_mode("review")
+    assert main_window._ribbon.current_mode == "review"
+
+
+def test_topbar_exists(main_window) -> None:
+    assert main_window._topbar.objectName() == "appTopBar"
 
 
 def test_ribbon_fits_at_minimum_width(qtbot, main_window, make_pdf) -> None:

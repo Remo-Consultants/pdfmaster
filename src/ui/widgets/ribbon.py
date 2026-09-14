@@ -1,7 +1,6 @@
-"""Ribbon-style toolbar with tabbed sections and labelled groups.
+"""Context tool rail — mode content without a visible ribbon tab strip.
 
-Slim, icon-first command bar — keeps Acrobat-style tabs without the
-dense height tax of classic office ribbons.
+Sidebar selects the active mode; this widget shows only that mode's groups.
 """
 
 from __future__ import annotations
@@ -15,7 +14,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QSizePolicy,
-    QTabWidget,
+    QStackedWidget,
     QToolButton,
     QVBoxLayout,
     QWidget,
@@ -23,8 +22,8 @@ from PySide6.QtWidgets import (
 
 from src.ui.theme import color as theme_color
 
-RIBBON_HEIGHT = 82
-RIBBON_COMPACT_HEIGHT = 72
+RIBBON_HEIGHT = 78
+RIBBON_COMPACT_HEIGHT = 68
 
 
 class RibbonGroup(QFrame):
@@ -88,7 +87,6 @@ class RibbonGroup(QFrame):
                 width = max(56, min(76, 10 + len(caption) * 7))
                 btn.setFixedSize(width, 48)
             else:
-                # Icon-only large button — same height as labelled neighbours.
                 btn.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
                 btn.setFixedSize(36, 48)
         else:
@@ -143,7 +141,7 @@ class RibbonGroup(QFrame):
 
 
 class RibbonTab(QWidget):
-    """One tab's content area containing multiple groups."""
+    """One mode's content area containing multiple groups."""
 
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
@@ -152,7 +150,7 @@ class RibbonTab(QWidget):
         self._scheme = "light"
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(4, 0, 4, 0)
+        layout.setContentsMargins(8, 4, 8, 2)
         layout.setSpacing(0)
         layout.addStretch(1)
         self._layout = layout
@@ -186,40 +184,58 @@ class RibbonTab(QWidget):
 
 
 class Ribbon(QWidget):
-    """A tabbed ribbon toolbar with groups of commands."""
+    """Context tool rail — stacked mode panels without a tab strip."""
 
     current_tab_changed = Signal(int)
+    mode_changed = Signal(str)
 
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
+        self.setObjectName("contextRail")
         self._tabs: Dict[str, RibbonTab] = {}
         self._tab_indices: Dict[str, int] = {}
+        self._index_to_mode: Dict[int, str] = {}
         self._scheme = "light"
         self._compact = False
+        self._current_mode = "home"
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        self._tab_widget = QTabWidget()
-        self._tab_widget.setTabPosition(QTabWidget.TabPosition.North)
-        self._tab_widget.setDocumentMode(True)
-        self._tab_widget.currentChanged.connect(self.current_tab_changed.emit)
-        layout.addWidget(self._tab_widget)
+        self._stack = QStackedWidget()
+        self._stack.currentChanged.connect(self._on_stack_changed)
+        layout.addWidget(self._stack)
 
         self.setFixedHeight(RIBBON_HEIGHT)
 
     def add_tab(self, name: str, title: str) -> RibbonTab:
-        """Add a tab to the ribbon."""
+        """Add a mode panel to the context rail (``title`` kept for API compat)."""
+        del title  # Sidebar owns the visible labels.
         tab = RibbonTab()
         self._tabs[name] = tab
-        idx = self._tab_widget.addTab(tab, title)
+        idx = self._stack.addWidget(tab)
         self._tab_indices[name] = idx
+        self._index_to_mode[idx] = name
         return tab
 
     def get_tab(self, name: str) -> Optional[RibbonTab]:
         """Get a tab by its internal name."""
         return self._tabs.get(name)
+
+    def set_mode(self, name: str) -> None:
+        """Show the tool groups for ``name`` (sidebar-driven)."""
+        idx = self._tab_indices.get(name)
+        if idx is None:
+            return
+        if self._compact and name != "home":
+            return
+        self._current_mode = name
+        self._stack.setCurrentIndex(idx)
+
+    @property
+    def current_mode(self) -> str:
+        return self._current_mode
 
     def set_compact(self, compact: bool) -> None:
         """Home-only essentials when no document is open."""
@@ -227,65 +243,35 @@ class Ribbon(QWidget):
             return
         self._compact = compact
         self.setFixedHeight(RIBBON_COMPACT_HEIGHT if compact else RIBBON_HEIGHT)
-        for name, idx in self._tab_indices.items():
-            if name == "home":
-                continue
-            self._tab_widget.setTabVisible(idx, not compact)
         if compact:
-            home_idx = self._tab_indices.get("home", 0)
-            self._tab_widget.setCurrentIndex(home_idx)
+            self.set_mode("home")
 
     @property
     def is_compact(self) -> bool:
         return self._compact
 
+    def _on_stack_changed(self, index: int) -> None:
+        self.current_tab_changed.emit(index)
+        mode = self._index_to_mode.get(index)
+        if mode:
+            self._current_mode = mode
+            self.mode_changed.emit(mode)
+
     def apply_scheme(self, scheme: str) -> None:
         """Update colours for the current theme."""
         self._scheme = scheme
-        bg = theme_color("window", scheme)
+        bg = theme_color("topbar", scheme)
         border = theme_color("border", scheme)
-        text = theme_color("window_text", scheme)
-        muted = theme_color("muted", scheme)
-        accent = theme_color("accent", scheme)
-        hover = theme_color("hover", scheme)
 
         self.setStyleSheet(f"""
-            Ribbon {{
+            Ribbon#contextRail {{
                 background: {bg};
                 border-bottom: 1px solid {border};
-            }}
-            QTabWidget::pane {{
-                border: none;
-                background: {bg};
-            }}
-            QTabBar {{
-                background: {bg};
-            }}
-            QTabBar::tab {{
-                background: transparent;
-                color: {muted};
-                padding: 5px 12px;
-                border: none;
-                border-bottom: 2px solid transparent;
-                margin-right: 1px;
-                border-top-left-radius: 6px;
-                border-top-right-radius: 6px;
-            }}
-            QTabBar::tab:hover {{
-                background: {hover};
-                color: {text};
-            }}
-            QTabBar::tab:selected {{
-                color: {text};
-                border-bottom: 2px solid {accent};
-                font-weight: 600;
             }}
             RibbonGroup {{
                 background: transparent;
             }}
         """)
-        # Do NOT style QToolButton via stylesheets — that forces Qt's
-        # classic engine and disables HiDPI icon pixmaps (blurry icons).
         for tab in self._tabs.values():
             tab.apply_scheme(scheme)
             for group in tab._groups:

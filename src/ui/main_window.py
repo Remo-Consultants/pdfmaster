@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QDialog,
     QDockWidget,
     QFileDialog,
+    QHBoxLayout,
     QLabel,
     QInputDialog,
     QMainWindow,
@@ -81,6 +82,8 @@ from src.ui.dialogs.security_dialog import (
 from src.ui.icons import action_icon, clear_cache, swatch_icon, tool_icon
 from src.ui.theme import apply_theme, detect_scheme
 from src.ui.tools import PRIMARY_TOOLS, TOOL_HINTS, TOOL_LABELS, ToolMode
+from src.ui.widgets.app_sidebar import AppSidebar
+from src.ui.widgets.app_topbar import AppTopBar
 from src.ui.widgets.bookmarks_panel import BookmarksPanel
 from src.ui.widgets.document_tabs import DocumentTab, DocumentTabs
 from src.ui.widgets.document_viewer import DocumentViewer
@@ -122,14 +125,30 @@ class MainWindow(QMainWindow):
 
         self._scheme = detect_scheme()
 
-        # Central widget: ribbon + (welcome | document tabs).
+        # Central: sidebar | (topbar + context rail + welcome/tabs).
         central = QWidget()
-        central_layout = QVBoxLayout(central)
-        central_layout.setContentsMargins(0, 0, 0, 0)
-        central_layout.setSpacing(0)
+        shell = QHBoxLayout(central)
+        shell.setContentsMargins(0, 0, 0, 0)
+        shell.setSpacing(0)
+
+        self._sidebar = AppSidebar(self._scheme, self)
+        self._sidebar.open_requested.connect(self.open_file)
+        self._sidebar.recent_requested.connect(self.open_file)
+        self._sidebar.mode_changed.connect(self._on_sidebar_mode)
+        shell.addWidget(self._sidebar)
+
+        right = QWidget()
+        right_layout = QVBoxLayout(right)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setSpacing(0)
+
+        self._topbar = AppTopBar(self)
+        self._topbar.open_requested.connect(self.open_file)
+        self._topbar.search_submitted.connect(self._on_top_search)
+        right_layout.addWidget(self._topbar)
 
         self._ribbon = Ribbon(self)
-        central_layout.addWidget(self._ribbon)
+        right_layout.addWidget(self._ribbon)
 
         self._workspace = QStackedWidget(self)
         self._welcome = WelcomeHome(self._scheme, self)
@@ -140,7 +159,9 @@ class MainWindow(QMainWindow):
         self._workspace.addWidget(self._welcome)
         self._workspace.addWidget(self._tabs)
         self._workspace.setCurrentWidget(self._welcome)
-        central_layout.addWidget(self._workspace, 1)
+        right_layout.addWidget(self._workspace, 1)
+
+        shell.addWidget(right, 1)
         self.setCentralWidget(central)
 
         self._tabs.active_tab_changed.connect(self._on_tab_changed)
@@ -168,9 +189,11 @@ class MainWindow(QMainWindow):
         self._reload_recent_menu()
         self.update_history_actions()
         self._ribbon.set_compact(True)
+        self._sidebar.set_document_modes_enabled(False)
+        self._topbar.set_search_enabled(False)
         self._sync_empty_workspace()
         self.statusBar().showMessage(
-            f"Use the Review tab for Compare, PDF/A, Search, and Batch — {APP_NAME} {APP_VERSION}",
+            f"Sidebar modes · Review for Compare & PDF/A — {APP_NAME} {APP_VERSION}",
             12000,
         )
         logger.info("Main window created")
@@ -208,7 +231,26 @@ class MainWindow(QMainWindow):
         self._tabs.apply_scheme(scheme)
         self._ribbon.apply_scheme(scheme)
         self._welcome.apply_scheme(scheme)
+        self._sidebar.apply_scheme(scheme)
         self._retheme_icons()
+
+    def _on_sidebar_mode(self, mode: str) -> None:
+        """Sidebar is the mode switcher; context rail follows."""
+        self._ribbon.set_mode(mode)
+
+    def _on_top_search(self, query: str) -> None:
+        """Run document search from the top chrome field."""
+        if self.document is None:
+            self.statusBar().showMessage(MSG_NO_DOCUMENT)
+            return
+        dialog = SearchDialog(self.document, self)
+        dialog.set_search_text(query)
+        dialog.go_to_page.connect(
+            lambda page: self.viewer.go_to_page(page) if self.viewer else None
+        )
+        dialog.show()
+        dialog.raise_()
+        dialog.activateWindow()
 
     def _retheme_icons(self) -> None:
         """Redraw every icon in the new scheme's ink colour."""
@@ -921,6 +963,8 @@ class MainWindow(QMainWindow):
         if has_docs:
             self._workspace.setCurrentWidget(self._tabs)
             self._ribbon.set_compact(False)
+            self._sidebar.set_document_modes_enabled(True)
+            self._topbar.set_search_enabled(True)
             if not self._docks_auto_shown:
                 self._thumb_dock.show()
                 self._thumb_dock.raise_()
@@ -929,6 +973,10 @@ class MainWindow(QMainWindow):
         else:
             self._workspace.setCurrentWidget(self._welcome)
             self._ribbon.set_compact(True)
+            self._sidebar.set_document_modes_enabled(False)
+            self._topbar.set_search_enabled(False)
+            self._sidebar.set_mode("home", emit=False)
+            self._ribbon.set_mode("home")
             self._welcome.refresh_recents()
             self._thumb_dock.hide()
             self._bookmarks_dock.hide()
@@ -1047,22 +1095,24 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(self._format_window_title(saved.name))
 
     def _reload_recent_menu(self) -> None:
-        if self._recent_menu is None:
-            return
-        self._recent_menu.clear()
         try:
             recent = FileHandler.get_recent_files(CONFIG_DIR)
         except FileOperationError:
             recent = []
-        if not recent:
-            empty = QAction("(None)", self)
-            empty.setEnabled(False)
-            self._recent_menu.addAction(empty)
-        else:
-            for item in recent:
-                action = QAction(item, self)
-                action.triggered.connect(lambda _checked=False, p=item: self.open_file(p))
-                self._recent_menu.addAction(action)
+        if self._recent_menu is not None:
+            self._recent_menu.clear()
+            if not recent:
+                empty = QAction("(None)", self)
+                empty.setEnabled(False)
+                self._recent_menu.addAction(empty)
+            else:
+                for item in recent:
+                    action = QAction(item, self)
+                    action.triggered.connect(
+                        lambda _checked=False, p=item: self.open_file(p)
+                    )
+                    self._recent_menu.addAction(action)
+        self._sidebar.set_recent_paths(recent)
         self._welcome.refresh_recents()
 
     # ------------------------------------------------------------------
@@ -1377,6 +1427,9 @@ class MainWindow(QMainWindow):
         if self.document is None:
             self.statusBar().showMessage(MSG_NO_DOCUMENT)
             return
+        self._sidebar.set_mode("review", emit=False)
+        self._ribbon.set_mode("review")
+        self._topbar.focus_search()
         dialog = SearchDialog(self.document, self)
         dialog.go_to_page.connect(lambda page: self.viewer.go_to_page(page) if self.viewer else None)
         dialog.show()

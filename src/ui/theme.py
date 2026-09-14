@@ -20,13 +20,13 @@ LIGHT = "light"
 DARK = "dark"
 
 # Corner radius used across QSS (stored as a digit string for the token table).
-RADIUS_PX = 8
+RADIUS_PX = 12
 
 # Every colour the UI needs, per scheme. Keeping them in one table makes
 # it obvious when a scheme is missing a value.
 COLORS: Dict[str, Dict[str, str]] = {
     LIGHT: {
-        "window": "#f4f6f8",
+        "window": "#f1f4f7",
         "window_text": "#0f172a",
         "base": "#ffffff",
         "alternate_base": "#f1f5f9",
@@ -38,8 +38,7 @@ COLORS: Dict[str, Dict[str, str]] = {
         "highlight_text": "#ffffff",
         "disabled_text": "#94a3b8",
         "border": "#e2e8f0",
-        # Soft studio canvas — calm enough that paper edges still read.
-        "canvas": "#e8eef2",
+        "canvas": "#e6ebf0",
         "page_border": "#cbd5e1",
         "shadow": "#64748b",
         "icon": "#1e293b",
@@ -50,10 +49,17 @@ COLORS: Dict[str, Dict[str, str]] = {
         "hover": "#eef2f6",
         "checked": "#ccfbf1",
         "paper": "#ffffff",
-        "surface": "#f8fafc",
+        "surface": "#ffffff",
         "muted": "#64748b",
         "danger": "#dc2626",
         "success": "#059669",
+        "sidebar": "#eef1f5",
+        "sidebar_text": "#334155",
+        "sidebar_active": "#ffffff",
+        "sidebar_hover": "#e4e9ef",
+        "topbar": "#ffffff",
+        "cta": "#0f172a",
+        "cta_text": "#ffffff",
         "radius": str(RADIUS_PX),
     },
     DARK: {
@@ -84,6 +90,13 @@ COLORS: Dict[str, Dict[str, str]] = {
         "muted": "#94a3b8",
         "danger": "#f87171",
         "success": "#34d399",
+        "sidebar": "#0c1016",
+        "sidebar_text": "#cbd5e1",
+        "sidebar_active": "#1a222c",
+        "sidebar_hover": "#161d26",
+        "topbar": "#141a22",
+        "cta": "#e8eef2",
+        "cta_text": "#0f1419",
         "radius": str(RADIUS_PX),
     },
 }
@@ -196,7 +209,7 @@ def build_stylesheet(scheme: str) -> str:
     }}
     QDockWidget::title {{
         background: {c['panel']};
-        padding: 8px 10px;
+        padding: 10px 12px;
         border-bottom: 1px solid {c['border']};
         text-align: left;
     }}
@@ -205,20 +218,18 @@ def build_stylesheet(scheme: str) -> str:
         color: {c['text']};
         border: 1px solid {c['border']};
         border-radius: {r}px;
-        padding: 2px 4px;
+        padding: 4px 8px;
         selection-background-color: {c['highlight']};
         selection-color: {c['highlight_text']};
     }}
     QListWidget {{ outline: 0; }}
-    QListWidget::item {{ padding: 4px; border-radius: 6px; }}
+    QListWidget::item {{ padding: 6px; border-radius: 8px; }}
     QListWidget::item:hover {{ background: {c['hover']}; }}
     QListWidget::item:selected {{
         background: {c['checked']};
         color: {c['text']};
         border: 1px solid {c['accent']};
     }}
-    /* Page thumbnails: outline the current page rather than tinting it,
-       so the preview image stays readable. */
     QListWidget#thumbnailPanel {{
         selection-background-color: transparent;
         selection-color: {c['text']};
@@ -228,7 +239,7 @@ def build_stylesheet(scheme: str) -> str:
     }}
     QListWidget#thumbnailPanel::item {{
         border: 2px solid transparent;
-        border-radius: 6px;
+        border-radius: 8px;
         margin: 2px;
     }}
     QListWidget#thumbnailPanel::item:hover {{
@@ -260,7 +271,7 @@ def build_stylesheet(scheme: str) -> str:
     }}
     QMenuBar::item {{
         padding: 4px 10px;
-        border-radius: 6px;
+        border-radius: 8px;
     }}
     QMenuBar::item:selected {{ background: {c['hover']}; }}
     QMenu {{
@@ -272,7 +283,7 @@ def build_stylesheet(scheme: str) -> str:
     }}
     QMenu::item {{
         padding: 6px 28px 6px 12px;
-        border-radius: 6px;
+        border-radius: 8px;
     }}
     QMenu::item:selected {{
         background: {c['highlight']};
@@ -290,12 +301,10 @@ def build_stylesheet(scheme: str) -> str:
     QTabWidget#documentTabs QTabBar::tab {{
         background: transparent;
         color: {c['muted']};
-        padding: 8px 14px;
-        margin-right: 2px;
+        padding: 8px 16px;
+        margin-right: 4px;
         border: none;
-        border-bottom: 2px solid transparent;
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
+        border-radius: 10px;
     }}
     QTabWidget#documentTabs QTabBar::tab:hover {{
         background: {c['hover']};
@@ -304,26 +313,111 @@ def build_stylesheet(scheme: str) -> str:
     QTabWidget#documentTabs QTabBar::tab:selected {{
         color: {c['text']};
         background: {c['surface']};
-        border-bottom: 2px solid {c['accent']};
+        font-weight: 600;
+        border: 1px solid {c['border']};
+    }}
+    QWidget#appSidebar {{
+        background: {c['sidebar']};
+        border-right: 1px solid {c['border']};
+    }}
+    QLabel#sidebarBrand {{
+        color: {c['window_text']};
+        font-weight: 700;
+        font-size: 15px;
+        background: transparent;
+    }}
+    QLabel#sidebarSection {{
+        color: {c['muted']};
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        background: transparent;
+        padding: 12px 12px 6px 12px;
+    }}
+    QToolButton#sidebarNav {{
+        background: transparent;
+        color: {c['sidebar_text']};
+        border: 1px solid transparent;
+        border-radius: 10px;
+        padding: 8px 12px;
+        text-align: left;
+        font-weight: 500;
+    }}
+    QToolButton#sidebarNav:hover {{
+        background: {c['sidebar_hover']};
+        color: {c['window_text']};
+    }}
+    QToolButton#sidebarNav:checked {{
+        background: {c['sidebar_active']};
+        color: {c['window_text']};
+        border-color: {c['border']};
         font-weight: 600;
     }}
-    QPushButton#welcomePrimary {{
-        background: {c['window_text']};
-        color: {c['bright_text']};
+    QWidget#appTopBar {{
+        background: {c['topbar']};
+        border-bottom: 1px solid {c['border']};
+    }}
+    QLineEdit#topSearch {{
+        background: {c['panel']};
+        border: 1px solid {c['border']};
+        border-radius: 12px;
+        padding: 8px 14px;
+        min-height: 18px;
+    }}
+    QPushButton#primaryCta {{
+        background: {c['cta']};
+        color: {c['cta_text']};
         border: none;
-        border-radius: 10px;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-weight: 600;
+    }}
+    QPushButton#primaryCta:hover {{
+        background: {c['accent']};
+        color: {c['bright_text']};
+    }}
+    QPushButton#sidebarOpen {{
+        background: {c['cta']};
+        color: {c['cta_text']};
+        border: none;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 600;
+    }}
+    QPushButton#sidebarOpen:hover {{
+        background: {c['accent']};
+        color: {c['bright_text']};
+    }}
+    QPushButton#sidebarGhost {{
+        background: transparent;
+        color: {c['sidebar_text']};
+        border: 1px solid {c['border']};
+        border-radius: 12px;
+        padding: 8px 14px;
+        font-weight: 500;
+    }}
+    QPushButton#sidebarGhost:hover {{
+        background: {c['sidebar_hover']};
+        color: {c['window_text']};
+    }}
+    QPushButton#welcomePrimary {{
+        background: {c['cta']};
+        color: {c['cta_text']};
+        border: none;
+        border-radius: 12px;
         padding: 12px 22px;
         font-weight: 600;
         font-size: 13px;
     }}
     QPushButton#welcomePrimary:hover {{
         background: {c['accent']};
+        color: {c['bright_text']};
     }}
     QPushButton#welcomeGhost {{
         background: transparent;
         color: {c['text']};
         border: 1px solid {c['border']};
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 10px 18px;
         font-weight: 500;
     }}
@@ -334,7 +428,7 @@ def build_stylesheet(scheme: str) -> str:
     QFrame#welcomeDropZone {{
         background: {c['surface']};
         border: 1.5px dashed {c['border']};
-        border-radius: 16px;
+        border-radius: 18px;
     }}
     QFrame#welcomeDropZone[dragActive="true"] {{
         border-color: {c['accent']};

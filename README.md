@@ -66,7 +66,7 @@ PDFMaster is composed like a commercial desktop product — not a thin wrapper a
   <img src="docs/assets/screenshots/workspace-review.png" alt="PDFMaster 0.8.1 — Review ribbon with Search, OCR, Compare, PDF/A, and Batch" width="100%" />
 </p>
 
-- **Ribbon** — Home / Markup / Edit / Organize / **Review** / View with labelled groups and HiDPI SVG icons (matches the [product page](https://remo-consultants.github.io/pdfmaster/) tab names — the site is marketing, the app is the real UI)
+- **Sidebar** — Home / Markup / Edit / Organize / **Review** / View as primary IA (context tool rail below the top bar)
 - **Tabs** — each open PDF keeps its own zoom, page, and undo history
 - **Theme** — follows Windows light/dark instantly; no restart
 - **Canvas** — continuous scrolling with soft page shadows so edges stay readable
@@ -84,7 +84,7 @@ PDFMaster is composed like a commercial desktop product — not a thin wrapper a
 | **Redact** | **True redaction** — underlying text and images are removed, not painted over |
 | **Organize** | Reorder (drag or buttons), reverse, merge PDFs into the open file, insert blank, duplicate, delete, rotate, import pages |
 | **Print / export** | System print + preview; PNG/JPEG export up to 600 dpi |
-| **Review** | Ribbon tab: Search (`Ctrl+F`), OCR, batch, **Compare**, **PDF/A** (plus Tools menu for power users) |
+| **Review** | Sidebar mode: Search (`Ctrl+F`), OCR, batch, **Compare**, **PDF/A** (plus Tools menu) |
 | **Search & OCR** | Document search (`Ctrl+F`); OCR scanned pages (`Ctrl+Shift+T`); text extract (`Ctrl+T`) |
 | **Security** | AES password protect / remove; security info; place signature fields |
 | **Batch** | Compress, extract, convert a folder of PDFs |
@@ -259,11 +259,21 @@ OCR is optional: install [Tesseract](https://github.com/tesseract-ocr/tesseract)
 | Visual compare, signature fields | Shipped (0.8) |
 | Review ribbon + visible stamps (0.8.1) | Shipped (0.8.1) |
 | Organize merge + drag reorder (0.8.2) | Shipped (0.8.2) |
+| Sidebar shell + context tool rail | Shipped (0.9.0) |
 | Cloud *opt-in*, PDF/A conversion | Ideas (later) |
 
 ---
 
 ## Changelog (recent)
+
+### 0.9.0 — 2026-09-14
+
+Red Dot–oriented sidebar shell — document stays the hero.
+
+- **Added:** Left **AppSidebar** (Home · Markup · Edit · Organize · Review · View)
+- **Added:** Top chrome with search field + Open PDF CTA
+- **Changed:** Ribbon tab strip removed; tools live on a context rail driven by the sidebar
+- **Changed:** Softer theme tokens (larger radius, sidebar/topbar/CTA surfaces)
 
 ### 0.8.2 — 2026-09-14
 

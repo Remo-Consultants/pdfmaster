@@ -6,7 +6,7 @@ from pathlib import Path
 # Application identity
 # ---------------------------------------------------------------------------
 APP_NAME = "PDFMaster"
-APP_VERSION = "0.8.2"
+APP_VERSION = "0.9.0"
 APP_AUTHOR = "PDFMaster Contributors"
 APP_DESCRIPTION = "A professional PDF viewer and editor for Windows"
 APP_LICENSE = "MIT"

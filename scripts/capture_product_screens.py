@@ -86,16 +86,12 @@ def main() -> int:
     app.processEvents()
     _wait(900)
 
-    review_idx = win._ribbon._tab_indices.get("review")
-    if review_idx is not None:
-        win._ribbon._tab_widget.setCurrentIndex(review_idx)
+    win._sidebar.set_mode("review")
     app.processEvents()
     _wait(250)
     _save(win, "workspace-review.png")
 
-    markup_idx = win._ribbon._tab_indices.get("markup")
-    if markup_idx is not None:
-        win._ribbon._tab_widget.setCurrentIndex(markup_idx)
+    win._sidebar.set_mode("markup")
     app.processEvents()
     _wait(250)
     _save(win, "workspace-markup.png")
