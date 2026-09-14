@@ -258,11 +258,20 @@ OCR is optional: install [Tesseract](https://github.com/tesseract-ocr/tesseract)
 | Document compare & PDF/A check | Shipped (0.7) |
 | Visual compare, signature fields | Shipped (0.8) |
 | Review ribbon + visible stamps (0.8.1) | Shipped (0.8.1) |
+| Organize merge + drag reorder (0.8.2) | Shipped (0.8.2) |
 | Cloud *opt-in*, PDF/A conversion | Ideas (later) |
 
 ---
 
 ## Changelog (recent)
+
+### 0.8.2 — 2026-09-14
+
+Organize tools for merging and reshuffling pages.
+
+- **Added:** **Merge PDFs** on Organize ribbon / Edit menu / Page Organizer (append or insert)
+- **Added:** Page Organizer — drag-and-drop reorder, Reverse order, Move to Top / Bottom
+- **Changed:** Product site and docs reshuffled (Product → Why → slim Install); README banner uses PNG
 
 ### 0.8.1 — 2026-09-14
 
@@ -272,7 +281,6 @@ Make Phase 3/4 tools visible on the ribbon and align docs with the desktop app.
 - **Changed:** Markup **Stamp** group — Watermark & Stamp with icons and labels
 - **Changed:** Window title includes version (`PDFMaster 0.8.1`); welcome screen lists Review/Markup tools
 - **Changed:** [Product page](https://remo-consultants.github.io/pdfmaster/) updated to v0.8.1 and six ribbon tabs
-- **Added (post-release):** Organize **Merge PDFs**; page organizer drag-reorder, reverse, move to top/bottom; docs site reshuffled
 
 ### 0.8.0 — 2026-09-14
 

@@ -2,7 +2,7 @@
 ; Requires NSIS 3.0 or later
 
 !define APP_NAME "PDFMaster"
-!define APP_VERSION "0.8.1"
+!define APP_VERSION "0.8.2"
 !define APP_PUBLISHER "PDFMaster Contributors"
 !define APP_URL "https://github.com/Remo-Consultants/pdfmaster"
 !define APP_EXE "PDFMaster.exe"

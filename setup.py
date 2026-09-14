@@ -14,7 +14,7 @@ REQUIREMENTS = [
 
 setup(
     name="pdfmaster",
-    version="0.8.1",
+    version="0.8.2",
     description="A professional PDF viewer and editor for Windows",
     long_description=README,
     long_description_content_type="text/markdown",

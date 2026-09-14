@@ -30,7 +30,7 @@
   <text x="72" y="168" fill="#99f6e4" font-family="Georgia, 'Times New Roman', serif" font-size="18" letter-spacing="6">REMO CONSULTANTS</text>
   <text x="72" y="248" fill="#f8fafc" font-family="Georgia, 'Times New Roman', serif" font-size="72">PDFMaster</text>
   <text x="74" y="302" fill="#cbd5e1" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-style="italic">The desk, not the cloud.</text>
-  <text x="74" y="360" fill="#94a3b8" font-family="ui-sans-serif, system-ui, sans-serif" font-size="16" letter-spacing="0.4">Windows · Offline-first · MIT · v0.8.1</text>
+  <text x="74" y="360" fill="#94a3b8" font-family="ui-sans-serif, system-ui, sans-serif" font-size="16" letter-spacing="0.4">Windows · Offline-first · MIT · v0.8.2</text>
 
   <!-- Stylized page stack (no SVG filters — GitHub sanitizes them) -->
   <g transform="translate(820 78)">

@@ -4,7 +4,7 @@
 
 **Tagline:** *The desk, not the cloud.*
 
-**Version:** 0.8.1  
+**Version:** 0.8.2  
 **License:** MIT  
 **Platform:** Windows 10/11 (64-bit); source runs on Linux/macOS  
 **Organization:** [Remo Consultants](https://github.com/Remo-Consultants)  
@@ -27,7 +27,7 @@ For decades, PDF software has meant powerful tools tied to subscriptions and clo
 
 Built with PySide6 and PyMuPDF, PDFMaster delivers the workspace patterns users expect from industry-leading editors — labelled ribbon groups, continuous page scrolling with soft shadows, thumbnails and bookmarks, bounded undo — while keeping every operation on the desktop. True redaction removes content from the file; atomic saves protect originals; a layered architecture keeps the UI maintainable as features grow.
 
-PDFMaster 0.8.1 surfaces compare, PDF/A, search, and batch on a dedicated **Review** ribbon tab, with labelled Watermark and Stamp controls on Markup. Earlier 0.8 work added optional visual compare and signature fields; 0.7 shipped text compare and PDF/A inspection.
+PDFMaster 0.8.2 adds Organize merge and drag-reorder for pages. 0.8.1 surfaces compare, PDF/A, search, and batch on a dedicated **Review** ribbon tab, with labelled Watermark and Stamp controls on Markup.
 
 PDFMaster is independent and not affiliated with Adobe, Foxit, Microsoft, or the PDF Association.
 
@@ -55,12 +55,12 @@ PDFMaster is independent and not affiliated with Adobe, Foxit, Microsoft, or the
 
 ---
 
-## Feature highlights (0.8.1)
+## Feature highlights (0.8.2)
 
 - View: zoom 25–400%, fit modes, thumbnails, bookmarks, properties  
 - Markup: highlight, underline, strikeout, notes, pen, shapes, stamps, watermarks  
 - Edit: replace text, add text/images, find/replace, forms, flatten  
-- Organize: reorder, insert, duplicate, delete, rotate, import pages  
+- Organize: reorder (drag), reverse, merge PDFs, insert, duplicate, delete, rotate, import  
 - Security: AES encrypt/decrypt copies, security info, signature fields  
 - **Review ribbon:** search, OCR, batch, compare (text + optional visual), PDF/A check  
 
