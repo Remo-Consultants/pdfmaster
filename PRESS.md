@@ -4,20 +4,20 @@
 
 **Tagline:** *The desk, not the cloud.*
 
-**Version:** 0.7.0  
+**Version:** 0.8.1  
 **License:** MIT  
 **Platform:** Windows 10/11 (64-bit); source runs on Linux/macOS  
 **Organization:** [Remo Consultants](https://github.com/Remo-Consultants)  
 **Product page:** https://remo-consultants.github.io/pdfmaster/  
 **Downloads:** https://github.com/Remo-Consultants/pdfmaster/releases/latest  
 
-**Related:** [Product reflection](REFLECTION.md) · [README](README.md) · [Product page](docs/index.html)
+> **You are here:** media kit. Product overview → [README](README.md) · Install → [INSTALL.md](INSTALL.md) · Reflection → [REFLECTION.md](REFLECTION.md)
 
 ---
 
 ## Boilerplate (short)
 
-PDFMaster is a professional desktop PDF workspace for Windows. It combines a ribbon interface, multi-document tabs, markup and editing tools, AES security, document compare, PDF/A inspection, and batch processing — entirely offline. Files never leave the user's machine. PDFMaster is open source under the MIT license.
+PDFMaster is a professional desktop PDF workspace for Windows. It combines a ribbon interface (including a Review tab for compare and PDF/A), multi-document tabs, markup and editing tools, AES security, and batch processing — entirely offline. Files never leave the user's machine. PDFMaster is open source under the MIT license.
 
 ---
 
@@ -27,7 +27,7 @@ For decades, PDF software has meant powerful tools tied to subscriptions and clo
 
 Built with PySide6 and PyMuPDF, PDFMaster delivers the workspace patterns users expect from industry-leading editors — labelled ribbon groups, continuous page scrolling with soft shadows, thumbnails and bookmarks, bounded undo — while keeping every operation on the desktop. True redaction removes content from the file; atomic saves protect originals; a layered architecture keeps the UI maintainable as features grow.
 
-PDFMaster 0.7 adds document compare (page-by-page text diff) and desktop PDF/A inspection. Earlier releases shipped search, OCR, text extraction, watermarks, stamps, forms, and NSIS/PyInstaller packaging for Setup.exe and portable ZIP distribution.
+PDFMaster 0.8.1 surfaces compare, PDF/A, search, and batch on a dedicated **Review** ribbon tab, with labelled Watermark and Stamp controls on Markup. Earlier 0.8 work added optional visual compare and signature fields; 0.7 shipped text compare and PDF/A inspection.
 
 PDFMaster is independent and not affiliated with Adobe, Foxit, Microsoft, or the PDF Association.
 
@@ -36,9 +36,9 @@ PDFMaster is independent and not affiliated with Adobe, Foxit, Microsoft, or the
 ## Key messages
 
 1. **Offline-first by design** — no account required to open a PDF  
-2. **Ribbon workspace without a subscription** — Home, Markup, Edit, Organize, View  
+2. **Ribbon workspace without a subscription** — Home, Markup, Edit, Organize, Review, View  
 3. **True redaction** — content removal, not cosmetic overlay  
-4. **Compare & PDF/A on the desk** — no external SaaS for basic compliance tasks  
+4. **Compare & PDF/A on the desk** — on the Review tab, no external SaaS  
 5. **MIT source** — auditable, forkable, packagable for internal IT  
 
 ---
@@ -50,20 +50,19 @@ PDFMaster is independent and not affiliated with Adobe, Foxit, Microsoft, or the
 | Data residency | Files stay on disk; no default upload path |
 | Cost | Free / MIT; no tier gating for redaction or security |
 | Honesty | Font substitution and text-fit limits are disclosed in UI |
-| Engineering | 260+ automated tests including headless Qt UI flows |
+| Engineering | 270+ automated tests including headless Qt UI flows |
 | Packaging | Setup.exe, portable ZIP, and reproducible PyInstaller build |
 
 ---
 
-## Feature highlights (0.7.0)
+## Feature highlights (0.8.1)
 
 - View: zoom 25–400%, fit modes, thumbnails, bookmarks, properties  
 - Markup: highlight, underline, strikeout, notes, pen, shapes, stamps, watermarks  
 - Edit: replace text, add text/images, find/replace, forms, flatten  
 - Organize: reorder, insert, duplicate, delete, rotate, import pages  
-- Security: AES encrypt/decrypt copies, security info  
-- Tools: search, OCR (optional engine), text extract, batch folder ops  
-- **New in 0.7:** compare two PDFs; PDF/A declaration check  
+- Security: AES encrypt/decrypt copies, security info, signature fields  
+- **Review ribbon:** search, OCR, batch, compare (text + optional visual), PDF/A check  
 
 ---
 
@@ -90,13 +89,13 @@ PDFMaster is independent and not affiliated with Adobe, Foxit, Microsoft, or the
 | Manifesto | `REFLECTION.md` |
 | Full README | `README.md` |
 
-For PNG/ICO app icons, see `resources/icons/` in the repository (when present in release branches).
+For PNG/ICO app icons, see `resources/icons/` in the repository.
 
 ---
 
 ## Suggested headlines
 
-- **PDFMaster 0.7 Brings Document Compare and PDF/A Checks to a Free Offline PDF Editor**
+- **PDFMaster 0.8.1 Puts Compare and PDF/A on the Ribbon of a Free Offline PDF Editor**
 - **Remo Consultants Ships PDFMaster: Ribbon-Grade PDF Tools Without the Cloud**
 - **MIT-Licensed PDFMaster Targets Professionals Who Want Adobe-Style UX and Local File Custody**
 
@@ -104,7 +103,7 @@ For PNG/ICO app icons, see `resources/icons/` in the repository (when present in
 
 ## 60-second pitch (spoken)
 
-PDFMaster is a Windows PDF viewer and editor that feels like the commercial tools you already know — ribbon, tabs, continuous pages — but your files never leave your PC. It is MIT-licensed and free. You get markup, true redaction, AES security, search, OCR, batch jobs, and in 0.7, document compare and PDF/A inspection. No account. No subscription. Just the desk.
+PDFMaster is a Windows PDF viewer and editor that feels like the commercial tools you already know — ribbon, tabs, continuous pages — but your files never leave your PC. It is MIT-licensed and free. You get markup, true redaction, AES security, and a Review tab for search, compare, and PDF/A. No account. No subscription. Just the desk.
 
 ---
 
@@ -112,43 +111,38 @@ PDFMaster is a Windows PDF viewer and editor that feels like the commercial tool
 
 **LinkedIn (short)**
 
-PDFMaster 0.7 is out: a free, offline-first PDF workspace for Windows with ribbon UX, true redaction, compare, and PDF/A checks — MIT licensed. *The desk, not the cloud.*
+PDFMaster 0.8.1 is out: a free, offline-first PDF workspace for Windows with a Review ribbon for compare and PDF/A, true redaction, and MIT licensing. *The desk, not the cloud.*
 
 Download: https://github.com/Remo-Consultants/pdfmaster/releases/latest  
 Story: https://github.com/Remo-Consultants/pdfmaster/blob/main/REFLECTION.md
 
 **X / Twitter (280 chars)**
 
-PDFMaster 0.7 — ribbon-grade PDF tools for Windows, fully offline. Compare docs, PDF/A check, true redaction, MIT. No cloud. No account. *The desk, not the cloud.* https://github.com/Remo-Consultants/pdfmaster/releases/latest
+PDFMaster 0.8.1 — ribbon-grade PDF tools for Windows, fully offline. Review tab: Compare, PDF/A, Search, Batch. True redaction. MIT. No cloud. *The desk, not the cloud.* https://github.com/Remo-Consultants/pdfmaster/releases/latest
 
 ---
 
-## GitHub release notes template (0.7.0)
-
-Copy into a release description when tagging `v0.7.0`:
+## GitHub release notes template (0.8.1)
 
 ```markdown
-## PDFMaster 0.7.0 — Compare & PDF/A on the desk
+## PDFMaster 0.8.1 — Review ribbon on the desk
 
 **The desk, not the cloud.** Professional PDF work stays on your machine.
 
 ### Highlights
-- **Compare Documents** — page-by-page text diff vs another PDF (Tools → Compare)
-- **PDF/A Check** — declaration, part/conformance, OutputIntent, structured findings
-- Watermarks, stamps, security, batch, OCR, and full ribbon workspace (0.5–0.6)
+- **Review** ribbon — Search, OCR, Compare, PDF/A, Batch
+- Labelled Watermark & Stamp on Markup; version in the title bar
+- Product page uses real app screenshots
 
 ### Install
 | Option | File |
 | --- | --- |
-| Recommended | `PDFMaster-0.7.0-Setup.exe` |
-| Portable | `PDFMaster-0.7.0-win64.zip` |
+| Recommended | `PDFMaster-0.8.1-Setup.exe` |
+| Portable | `PDFMaster-0.8.1-win64.zip` |
 
 ### Docs
 - [Quick start](QUICKSTART.md) · [Install](INSTALL.md) · [Reflection](REFLECTION.md) · [Press kit](PRESS.md)
 - Product page: https://remo-consultants.github.io/pdfmaster/
-
-### Notes
-PDFMaster is independent and not affiliated with Adobe, Foxit, or the PDF Association.
 ```
 
 ---

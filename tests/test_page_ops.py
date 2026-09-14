@@ -177,3 +177,41 @@ def test_page_summaries(make_pdf) -> None:
         assert summaries[0]["number"] == 1
         assert summaries[0]["orientation"] == "landscape"
         assert summaries[0]["rotation"] == 0
+
+
+def test_merge_pdfs_appends_in_order(make_pdf) -> None:
+    target = make_pdf(name="merge-base.pdf", pages=2)
+    a = make_pdf(name="merge-a.pdf", pages=1)
+    b = make_pdf(name="merge-b.pdf", pages=1)
+    with Document(target) as doc:
+        added = PageOrganizer.merge_pdfs(doc, [a, b], at_index=-1)
+        assert added == 2
+        assert _labels(doc) == ["Page 1", "Page 2", "Page 1", "Page 1"]
+
+
+def test_merge_pdfs_inserts_at_index(make_pdf) -> None:
+    target = make_pdf(name="merge-mid.pdf", pages=2)
+    extra = make_pdf(name="merge-extra.pdf", pages=1)
+    with Document(target) as doc:
+        PageOrganizer.merge_pdfs(doc, [extra], at_index=1)
+        assert _labels(doc) == ["Page 1", "Page 1", "Page 2"]
+
+
+def test_merge_pdfs_requires_files(make_pdf) -> None:
+    with Document(make_pdf(pages=1)) as doc:
+        with pytest.raises(ValidationError):
+            PageOrganizer.merge_pdfs(doc, [])
+
+
+def test_reverse_order(make_pdf) -> None:
+    with Document(make_pdf(pages=4)) as doc:
+        PageOrganizer.reverse_order(doc)
+        assert _labels(doc) == ["Page 4", "Page 3", "Page 2", "Page 1"]
+
+
+def test_move_pages_to_top_and_bottom(make_pdf) -> None:
+    with Document(make_pdf(pages=5)) as doc:
+        PageOrganizer.move_pages_to_edge(doc, [1, 3], to_start=True)
+        assert _labels(doc) == ["Page 2", "Page 4", "Page 1", "Page 3", "Page 5"]
+        PageOrganizer.move_pages_to_edge(doc, [0, 1], to_start=False)
+        assert _labels(doc) == ["Page 1", "Page 3", "Page 5", "Page 2", "Page 4"]

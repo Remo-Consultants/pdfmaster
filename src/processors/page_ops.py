@@ -191,6 +191,60 @@ class PageOrganizer:
         return added
 
     @staticmethod
+    def merge_pdfs(
+        document: Document,
+        source_paths: Sequence[PathLike],
+        at_index: int = -1,
+    ) -> int:
+        """Import every page from one or more PDFs into ``document``.
+
+        Files are inserted in the given order. ``at_index`` of ``-1``
+        appends after the last page; otherwise pages are inserted before
+        that index (and successive files follow the previous insert).
+        """
+        paths = list(source_paths)
+        if not paths:
+            raise ValidationError("Select at least one PDF to merge.")
+        cursor = document.page_count if at_index < 0 else at_index
+        if cursor < 0 or cursor > document.page_count:
+            cursor = document.page_count
+        total = 0
+        for path in paths:
+            added = PageOrganizer.import_pages(document, path, at_index=cursor)
+            total += added
+            cursor += added
+        logger.info("Merged %s page(s) from %s file(s)", total, len(paths))
+        return total
+
+    @staticmethod
+    def reverse_order(document: Document) -> None:
+        """Reverse the document page order."""
+        count = document.page_count
+        if count < 2:
+            return
+        PageOrganizer.reorder(document, list(range(count - 1, -1, -1)))
+
+    @staticmethod
+    def move_pages_to_edge(
+        document: Document,
+        indices: Sequence[int],
+        *,
+        to_start: bool,
+    ) -> None:
+        """Move selected pages to the start or end, preserving relative order."""
+        count = document.page_count
+        selected = sorted({int(i) for i in indices})
+        if not selected:
+            raise ValidationError("Select at least one page to move.")
+        for index in selected:
+            PageOrganizer._check_index(index, count)
+        if len(selected) == count:
+            return
+        remaining = [i for i in range(count) if i not in selected]
+        order = selected + remaining if to_start else remaining + selected
+        PageOrganizer.reorder(document, order)
+
+    @staticmethod
     def page_summaries(document: Document) -> List[dict]:
         """Return light metadata for every page, for the organiser dialog."""
         summaries = []

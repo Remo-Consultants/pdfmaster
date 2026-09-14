@@ -126,6 +126,11 @@ ACTION_SVGS: Dict[str, str] = {
         '<rect fill="{ink}" x="3" y="4" width="8" height="11" rx="1.2"/>',
         '<rect fill="{accent}" x="13" y="8" width="8" height="11" rx="1.2"/>',
     ),
+    "merge": _svg(
+        '<rect fill="{ink}" x="3" y="5" width="8" height="14" rx="1.2"/>',
+        '<rect fill="{accent}" x="13" y="5" width="8" height="14" rx="1.2"/>',
+        '<path fill="none" stroke="{ink}" stroke-width="1.8" stroke-linecap="round" d="M11 12h2"/>',
+    ),
     "delete_page": _svg(
         '<path fill="{ink}" d="M9 4h6l1 2h4v2H4V6h4l1-2Zm1 6h2v8h-2v-8Zm4 0h2v8h-2v-8ZM6 8h12l-1 12H7L6 8Z"/>',
     ),

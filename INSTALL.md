@@ -2,7 +2,9 @@
 
 Straight paths from download to working on a PDF.
 
-**Product overview:** [`docs/index.html`](docs/index.html) · **Why PDFMaster:** [`REFLECTION.md`](REFLECTION.md) · **Media:** [`PRESS.md`](PRESS.md)
+> **You are here:** detailed install & packaging. Product overview → [README](README.md) · First-run walkthrough → [QUICKSTART.md](QUICKSTART.md) · Product page → https://remo-consultants.github.io/pdfmaster/
+
+**Why PDFMaster:** [`REFLECTION.md`](REFLECTION.md) · **Media:** [`PRESS.md`](PRESS.md)
 
 ---
 

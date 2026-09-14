@@ -17,13 +17,13 @@
 
 <p align="center">
   <a href="https://remo-consultants.github.io/pdfmaster/">Product page</a> ·
-  <a href="#install">Install</a> ·
-  <a href="#the-workspace">Workspace</a> ·
-  <a href="REFLECTION.md">Product reflection</a> ·
-  <a href="PRESS.md">Press kit</a> ·
+  <a href="INSTALL.md">Install guide</a> ·
   <a href="QUICKSTART.md">Quick start</a> ·
-  <a href="INSTALL.md">Install guide</a>
+  <a href="REFLECTION.md">Product reflection</a> ·
+  <a href="PRESS.md">Press kit</a>
 </p>
+
+> **You are here:** product overview & architecture. Detailed install → [`INSTALL.md`](INSTALL.md). First-run walkthrough → [`QUICKSTART.md`](QUICKSTART.md).
 
 ---
 
@@ -50,49 +50,11 @@ PDFMaster is the counter-offer:
 
 ## Install
 
-### Option A — Windows Setup.exe *(recommended)*
+1. **Setup.exe** — download from the [latest release](https://github.com/Remo-Consultants/pdfmaster/releases/latest), run the installer, launch PDFMaster  
+2. **Portable ZIP** — extract `PDFMaster-*-win64.zip` and run `PDFMaster.exe`  
+3. **From source / build packages** — see [`INSTALL.md`](INSTALL.md)
 
-1. Open the [latest release](https://github.com/Remo-Consultants/pdfmaster/releases/latest)
-2. Download **`PDFMaster-*-Setup.exe`**
-3. Run the installer → Start Menu / desktop shortcut
-4. Launch **PDFMaster** → **Ctrl+O**
-
-### Option B — Portable ZIP
-
-1. Download **`PDFMaster-*-win64.zip`**
-2. Extract anywhere → run **`PDFMaster.exe`**
-3. No admin install required — USB-friendly
-
-### Option C — From source
-
-```powershell
-git clone https://github.com/Remo-Consultants/pdfmaster.git
-cd pdfmaster
-python -m venv venv
-.\venv\Scripts\activate
-pip install -r requirements.txt
-python -m src.main
-```
-
-Linux/macOS: use `source venv/bin/activate`.
-
-### Build the Windows packages yourself
-
-```powershell
-.\venv\Scripts\activate
-pip install pyinstaller
-# Optional for Setup.exe:
-# winget install NSIS.NSIS
-python installer/build_installer.py --clean --nsis
-```
-
-| Artifact | Purpose |
-| --- | --- |
-| `dist/PDFMaster/` | Folder distribution (`PDFMaster.exe`) |
-| `dist/PDFMaster-<version>-win64.zip` | Portable ZIP |
-| `dist/PDFMaster-<version>-Setup.exe` | NSIS installer |
-
-Full packaging notes: [`INSTALL.md`](INSTALL.md).
+After install, follow [`QUICKSTART.md`](QUICKSTART.md) for first-run steps.
 
 ---
 
@@ -120,7 +82,7 @@ PDFMaster is composed like a commercial desktop product — not a thin wrapper a
 | **Stamps & watermarks** | Text watermarks (opacity, angle, range); rubber stamps (DRAFT, CONFIDENTIAL…); image stamps |
 | **Edit** | Edit/replace text, add text/images, erase, find/replace, fillable forms, flatten |
 | **Redact** | **True redaction** — underlying text and images are removed, not painted over |
-| **Organize** | Reorder, insert blank, duplicate, delete, rotate, import pages |
+| **Organize** | Reorder (drag or buttons), reverse, merge PDFs into the open file, insert blank, duplicate, delete, rotate, import pages |
 | **Print / export** | System print + preview; PNG/JPEG export up to 600 dpi |
 | **Review** | Ribbon tab: Search (`Ctrl+F`), OCR, batch, **Compare**, **PDF/A** (plus Tools menu for power users) |
 | **Search & OCR** | Document search (`Ctrl+F`); OCR scanned pages (`Ctrl+Shift+T`); text extract (`Ctrl+T`) |
@@ -156,7 +118,9 @@ More detail: [`QUICKSTART.md`](QUICKSTART.md) · visual overview: [`docs/index.h
 
 ---
 
-## Design & architecture
+## Architecture
+
+UI never talks to PyMuPDF directly. `Document` owns the open handle; processors and services mutate under lock.
 
 PDFMaster is a **layered** desktop app: the UI never calls PyMuPDF directly. One `Document` owns the open handle under a lock; background render workers and edit processors share that contract.
 
@@ -308,6 +272,7 @@ Make Phase 3/4 tools visible on the ribbon and align docs with the desktop app.
 - **Changed:** Markup **Stamp** group — Watermark & Stamp with icons and labels
 - **Changed:** Window title includes version (`PDFMaster 0.8.1`); welcome screen lists Review/Markup tools
 - **Changed:** [Product page](https://remo-consultants.github.io/pdfmaster/) updated to v0.8.1 and six ribbon tabs
+- **Added (post-release):** Organize **Merge PDFs**; page organizer drag-reorder, reverse, move to top/bottom; docs site reshuffled
 
 ### 0.8.0 — 2026-09-14
 

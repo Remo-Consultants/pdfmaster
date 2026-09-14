@@ -1,129 +1,20 @@
 # PDFMaster Quick Start
 
-Get PDFMaster running in about five minutes.
+First-run walkthrough after you have PDFMaster installed.
 
-**Prefer a Windows installer?** See [`INSTALL.md`](INSTALL.md) — download
-Setup.exe or the portable ZIP from
-[Releases](https://github.com/Remo-Consultants/pdfmaster/releases/latest),
-then skip to [First steps](#first-steps).
+> **You are here:** open a PDF and learn the workspace. Install / packaging → [`INSTALL.md`](INSTALL.md) · Product overview → [`README.md`](README.md) · Product page → https://remo-consultants.github.io/pdfmaster/
 
-**Product page:** https://remo-consultants.github.io/pdfmaster/  
-**Product reflection:** [`REFLECTION.md`](REFLECTION.md) — *The desk, not the cloud.*  
-**Press / media:** [`PRESS.md`](PRESS.md)
-
-This page covers the **from-source** path for developers. If you already
-have the app installed, skip to [First steps](#first-steps).
+**Product reflection:** [`REFLECTION.md`](REFLECTION.md) · **Press / media:** [`PRESS.md`](PRESS.md)
 
 ---
 
-## What you need
+## Before you start
 
-- A Windows 10/11 PC
-- Either the release installer/ZIP, **or** Python 3.10+ for source installs
-- A sample PDF to open (any normal, non-password file)
+1. Install via **Setup.exe** or portable ZIP (see [`INSTALL.md`](INSTALL.md)), **or** run from source with the steps in that same guide  
+2. Launch **PDFMaster**  
+3. Have a sample PDF ready (any normal, non-password file)
 
-Linux and macOS users can follow the source steps. Replace
-`venv\Scripts\activate` with `source venv/bin/activate`.
-
----
-
-## Fastest path — release build
-
-1. Open https://github.com/Remo-Consultants/pdfmaster/releases/latest  
-2. Download **Setup.exe** (recommended) or **win64.zip**  
-3. Install or extract, launch **PDFMaster**  
-4. Continue at [First steps](#first-steps)
-
----
-
-## Step 1 — Install Python (source only)
-
-1. Open https://www.python.org/downloads/
-2. Download Python 3.10 or newer
-3. Run the installer
-4. Check **Add python.exe to PATH**
-5. Finish the installer
-
-Check it worked. Open PowerShell and type:
-
-```powershell
-python --version
-```
-
-You should see something like `Python 3.12.4`. If the command is not
-found, try:
-
-```powershell
-py -3 --version
-```
-
-and use `py -3` everywhere this guide says `python`.
-
----
-
-## Step 2 — Open the project folder
-
-In PowerShell:
-
-```powershell
-cd pdfmaster
-```
-
-(Or clone first: `git clone https://github.com/Remo-Consultants/pdfmaster.git`)
-
-If you cloned or copied the project elsewhere, `cd` to that
-`pdfmaster` directory instead. You should see `src`,
-`requirements.txt`, and `README.md` when you run `dir`.
-
----
-
-## Step 3 — Create a virtual environment
-
-A virtual environment is a private Python folder so PDFMaster's
-libraries do not mix with other projects.
-
-```powershell
-python -m venv venv
-venv\Scripts\activate
-```
-
-After activate, your prompt usually starts with `(venv)`.
-
-If PowerShell blocks the activate script:
-
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-venv\Scripts\activate
-```
-
----
-
-## Step 4 — Install libraries
-
-```powershell
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-This installs PySide6, PyMuPDF, PyPDF, Pillow, cryptography, pytest, and
-pytest-qt. The first run can take a few minutes.
-
-Sanity check:
-
-```powershell
-python -c "import PySide6, fitz, pypdf, PIL; print('PDFMaster deps OK')"
-```
-
----
-
-## Step 5 — Start PDFMaster
-
-```powershell
-python -m src.main
-```
-
-A window titled **PDFMaster** should open. If it does not, read
-[Common problems](#common-problems).
+Then continue below.
 
 ---
 
@@ -149,8 +40,7 @@ or delete, save.
 
 ### The window
 
-- **Ribbon** — Home / Markup / Edit / Organize / View tabs with labelled
-  groups (File, Zoom, Text Markup, …)
+- **Ribbon** — Home / Markup / Edit / Organize / **Review** / View
 - **Document tabs** — one tab per open PDF; close a tab with its ×
 - **Left sidebar** — thumbnails (**F9**) and a **Bookmarks** tab for
   the document outline
@@ -161,19 +51,18 @@ or delete, save.
 Hover any ribbon button for its name and shortcut. PDFMaster follows the
 Windows light or dark setting, and changes with it straight away.
 
-### Search, OCR, security, and batch (0.5.0)
+### Review tab (search, compare, PDF/A, batch)
 
-These live under the **Tools** menu:
+Open the **Review** ribbon tab (also under **Tools**):
 
-- **Ctrl+F** — Search Document (case / whole-word options, jump to hits)
+- **Ctrl+F** — Search Document
 - **Ctrl+Shift+T** — OCR Scanned Pages (needs tesseract or easyocr)
-- **Ctrl+T** — Extract Text panel (page, range, or all pages → clipboard)
-- **Watermark…** / **Stamp…** — diagonal text watermarks or rubber/image stamps
-- **Compare Documents…** — text diff (optional visual/rendered compare)
-- **PDF/A Check…** — see if the file declares PDF/A and basic findings
-- **Batch Processing** — compress / extract / convert a folder of PDFs
-- **Security Info** / **Set Password** / **Remove Password** / **Add Signature Field**
-
+- **Ctrl+T** — Extract Text panel
+- **Compare** — text diff (optional visual/rendered compare)
+- **PDF/A** — declaration and basic findings
+- **Batch** — compress / extract / convert a folder of PDFs
+- **Tools → Security** — passwords, security info, signature fields
+- **Markup** — Watermark… / Stamp…
 ---
 
 ## Editing a PDF
@@ -270,93 +159,46 @@ You do not need to create those folders. The app creates them.
 
 ## Run tests (optional)
 
-With the same venv active:
+If you develop from source (see [`INSTALL.md`](INSTALL.md)):
 
 ```powershell
 pytest -v
 ```
 
-You want a green pass on all 50 tests. These include headless GUI tests
-that open the real window and click through navigation, zoom, rotation,
-and page deletion, so a green run is a strong signal the app works.
-
----
-
 ## Common problems
 
-### `python` not found
-
-Python is not on PATH. Reinstall and enable **Add to PATH**, or use
-`py -3`.
-
-### `pip` fails with permission errors
-
-You forgot to activate `venv`, or you are installing into a protected
-system Python. Activate the venv and try again. Do not use
-`sudo pip` on Linux for this project.
-
-### `No module named src`
-
-You are not in the repo root. `cd` there, then
-`python -m src.main`.
-
-### Window opens then closes
-
-Look at the terminal for a traceback. A typical cause is a broken
-PySide6 install. Re-run `pip install --force-reinstall PySide6`.
+Install and environment issues (Python PATH, venv, PySide6) are covered in [`INSTALL.md`](INSTALL.md).
 
 ### "not a valid PDF"
 
-The file is not a real PDF (for example a `.pdf` that is actually
-HTML). Open it in Notepad: the first characters must be `%PDF-`.
+The file is not a real PDF. Open it in Notepad: the first characters must be `%PDF-`.
 
 ### Encrypted PDF will not open
 
-Opening a password-protected file still needs the password at load time.
-To protect an open file yourself, use **Tools → Set Password** and save
-a protected copy. **Tools → Security Info** shows encryption status.
+Opening a password-protected file needs the password at load time.
+**Tools → Security Info** shows encryption status.
 
 ### Changes disappeared after close
 
-You need to Save. Rotate and delete are kept in memory until Save or
-Save As.
+You need to Save. Edits stay in memory until Save or Save As.
 
 ### OneDrive lock / save error
 
 Save As to a local folder such as `Documents\PDFMaster-out`, then copy
-back when sync is idle. Your edits stay loaded in the window when a save
-is refused, so nothing is lost.
-
-### A page looks blank for a moment after zooming
-
-Rendering runs in the background so the window never freezes. On a very
-large page you may briefly see the previous zoom level before the sharp
-version replaces it.
-
-### Logs not created
-
-The process never reached `setup_logging`. Run from a terminal (not by
-double-clicking a broken shortcut) so you can see the error.
+back when sync is idle.
 
 ---
 
 ## Next reading
 
-- [README.md](README.md) — full features, architecture, install
-- [REFLECTION.md](REFLECTION.md) — product manifesto & competitive positioning
-- `src/constants.py` — change window size, zoom limits, colors
-- `src/ui/main_window.py` — menus and ribbon
-- `src/ui/widgets/ribbon.py` — ribbon tabs and groups
-- `src/ui/widgets/document_tabs.py` — multi-document tabs
+- [README.md](README.md) — full features and architecture  
+- [INSTALL.md](INSTALL.md) — Setup.exe, ZIP, source, packaging  
+- [REFLECTION.md](REFLECTION.md) — product manifesto  
 
 ---
 
 ## Where to find help
 
-1. This file for setup
-2. README troubleshooting section for runtime issues
-3. The log file for exact exception text
-4. Your IDE's Python interpreter setting — it must point at `venv`
-
-You are done when: the window opens, a PDF displays, zoom and page
-navigation work, and the app exits with no traceback in the terminal.
+- [GitHub Issues](https://github.com/Remo-Consultants/pdfmaster/issues)
+- Product page: https://remo-consultants.github.io/pdfmaster/
+- Log file: `%USERPROFILE%\.pdfmaster\logs\pdfmaster.log`

@@ -312,6 +312,11 @@ class MainWindow(QMainWindow):
         self.organize_action.triggered.connect(lambda: self.editor.organize_pages())
         edit_menu.addAction(self.organize_action)
 
+        self.merge_action = QAction("&Merge PDFs...", self)
+        self.merge_action.setStatusTip("Append pages from other PDFs into this document")
+        self.merge_action.triggered.connect(lambda: self.editor.merge_pdfs_into_document())
+        edit_menu.addAction(self.merge_action)
+
         self.form_action = QAction("Fill &Form...", self)
         self.form_action.setShortcut(QKeySequence(SHORTCUTS["fill_forms"]))
         self.form_action.setStatusTip("Fill in this document's form fields")
@@ -762,6 +767,11 @@ class MainWindow(QMainWindow):
         pages_grp.add_action(self.delete_action, large=True, label="Delete")
         self._icon_actions["organize"] = self.organize_action
         self._icon_actions["delete_page"] = self.delete_action
+
+        merge_grp = organize.add_group("Merge")
+        self.merge_action.setIcon(action_icon("merge", self._scheme))
+        merge_grp.add_action(self.merge_action, large=True, label="Merge")
+        self._icon_actions["merge"] = self.merge_action
 
         rotate_grp = organize.add_group("Rotate")
         rotate_ccw_action = QAction(action_icon("rotate_ccw", self._scheme), "", self)
@@ -1321,6 +1331,7 @@ class MainWindow(QMainWindow):
             self.export_images_action,
             self.find_replace_action,
             self.organize_action,
+            getattr(self, "merge_action", None),
             self.form_action,
             self.clear_markup_action,
             self.flatten_action,

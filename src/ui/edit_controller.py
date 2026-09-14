@@ -31,11 +31,13 @@ from src.constants import (
     MSG_TEXT_NOT_FOUND,
     MSG_TEXT_REPLACED,
     MSG_UNDONE,
+    PDF_FILTER,
 )
 from src.core.history import DocumentHistory
 from src.processors.annotations import AnnotationProcessor
 from src.processors.content import ContentEditor
 from src.processors.forms import FormProcessor
+from src.processors.page_ops import PageOrganizer
 from src.processors.redaction import Redactor
 from src.processors.watermark import WatermarkProcessor
 from src.services.print_service import PrintService
@@ -361,6 +363,27 @@ class EditController:
             lambda: self._finish("Page structure updated")
         )
         dialog.exec()
+        self._window.refresh_after_edit()
+
+    def merge_pdfs_into_document(self) -> None:
+        """Prompt for PDFs and merge them into the open document."""
+        if not self._require_document():
+            return
+        paths, _ = QFileDialog.getOpenFileNames(
+            self._window,
+            "Merge PDFs into this document",
+            str(Path.home()),
+            PDF_FILTER,
+        )
+        if not paths:
+            return
+        self._begin_edit()
+        try:
+            added = PageOrganizer.merge_pdfs(self.document, paths, at_index=-1)
+        except PDFMasterException as exc:
+            QMessageBox.warning(self._window, APP_NAME, str(exc))
+            return
+        self._finish(f"Merged {added} page(s) from {len(paths)} PDF(s)")
         self._window.refresh_after_edit()
 
     def fill_form(self) -> None:
