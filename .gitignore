@@ -45,3 +45,6 @@ credentials.json
 
 # Generated PDFs from tests
 tests/artifacts/
+
+# Generated sample used by scripts/capture_product_screens.py
+docs/assets/screenshots/_sample.pdf

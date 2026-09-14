@@ -85,7 +85,7 @@ class RibbonGroup(QFrame):
             btn.setIconSize(QSize(22, 22))
             if caption:
                 btn.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
-                width = max(48, min(68, 8 + len(caption) * 6))
+                width = max(56, min(76, 10 + len(caption) * 7))
                 btn.setFixedSize(width, 48)
             else:
                 # Icon-only large button — same height as labelled neighbours.

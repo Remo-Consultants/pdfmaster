@@ -129,12 +129,11 @@
 
     .stage {
       position: relative;
-      min-height: 340px;
       border-radius: calc(var(--radius) + 6px);
       background: linear-gradient(160deg, #0f172a 0%, #1e293b 55%, #115e59 120%);
       box-shadow: var(--shadow);
       overflow: hidden;
-      padding: 1.5rem;
+      padding: 1rem;
     }
     .stage::before {
       content: "";
@@ -144,104 +143,63 @@
       background: radial-gradient(circle, rgba(45, 212, 191, 0.35), transparent 65%);
       pointer-events: none;
     }
-    .window {
+    .shot-frame {
       position: relative;
-      background: #f8fafc;
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid rgba(255,255,255,0.12);
       box-shadow: 0 20px 40px rgba(0,0,0,0.25);
       animation: rise 0.8s ease both;
+      background: #0b1220;
     }
-    .titlebar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0.65rem 0.8rem;
-      background: #e2e8f0;
+    .shot-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+      vertical-align: middle;
     }
-    .dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; }
-    .win-title {
-      margin-left: auto;
-      font-size: 0.65rem;
-      font-weight: 600;
-      color: var(--slate);
-      letter-spacing: 0.02em;
-    }
-    .mock-caption {
+    .shot-caption {
       margin: 0.85rem 0 0;
       font-size: 0.8rem;
       color: rgba(248, 250, 252, 0.75);
       text-align: center;
-      max-width: 22rem;
+      max-width: 24rem;
       margin-inline: auto;
     }
-    .ribbon {
+    .shot-row {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 0.35rem;
-      padding: 0.6rem;
-      background: white;
-      border-bottom: 1px solid var(--line);
-      font-size: 0.68rem;
-      color: var(--muted);
-      text-align: center;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1.5rem;
     }
-    .ribbon span {
-      padding: 0.45rem 0.2rem;
-      border-radius: 8px;
-      background: #f1f5f9;
+    .shot-card {
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--white);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
     }
-    .ribbon span.active { background: var(--teal-soft); color: var(--teal-deep); font-weight: 600; }
-    .canvas {
-      display: grid;
-      grid-template-columns: 72px 1fr;
-      min-height: 210px;
-      background: #cbd5e1;
+    .shot-card img {
+      display: block;
+      width: 100%;
+      height: auto;
     }
-    .thumbs { padding: 0.6rem; display: grid; gap: 0.4rem; background: #e2e8f0; }
-    .thumb {
-      height: 42px;
-      border-radius: 4px;
-      background: white;
-      box-shadow: 0 1px 2px rgba(15,23,42,0.08);
+    .shot-card figcaption {
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      color: var(--slate);
+      border-top: 1px solid var(--line);
     }
-    .pages {
-      padding: 1rem;
-      display: grid;
-      gap: 0.75rem;
-      justify-items: center;
-    }
-    .page {
-      width: min(78%, 220px);
-      aspect-ratio: 8.5 / 11;
-      background: white;
-      border-radius: 2px;
-      box-shadow:
-        0 1px 0 rgba(15,23,42,0.04),
-        0 8px 16px rgba(15,23,42,0.12),
-        0 18px 36px rgba(15,23,42,0.08);
-      padding: 12% 10%;
-    }
-    .page .line {
-      height: 6px;
-      border-radius: 99px;
-      background: #e2e8f0;
-      margin-bottom: 8px;
-    }
-    .page .line.short { width: 55%; }
-    .page .mark {
-      height: 14px;
-      width: 70%;
-      border-radius: 3px;
-      background: rgba(250, 204, 21, 0.45);
-      margin: 10px 0;
+    @media (max-width: 720px) {
+      .shot-row { grid-template-columns: 1fr; }
     }
 
     @keyframes rise {
       from { opacity: 0; transform: translateY(18px) scale(0.98); }
       to { opacity: 1; transform: none; }
     }
+
+    /* Product screenshots replace the old CSS window mock */
 
     section { padding: 3rem 0; }
     .section-head {
@@ -466,26 +424,16 @@
           <a class="btn btn-secondary" href="https://github.com/Remo-Consultants/pdfmaster/blob/main/REFLECTION.md">Read the reflection</a>
         </div>
       </div>
-      <div class="stage" aria-hidden="true">
-        <div class="window">
-          <div class="titlebar">
-            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-            <span class="win-title">PDFMaster 0.8.1</span>
-          </div>
-          <div class="ribbon">
-            <span>Home</span><span>Markup</span><span>Edit</span><span>Organize</span><span class="active">Review</span><span>View</span>
-          </div>
-          <div class="canvas">
-            <div class="thumbs"><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div></div>
-            <div class="pages">
-              <div class="page">
-                <div class="line"></div><div class="line"></div><div class="mark"></div>
-                <div class="line short"></div><div class="line"></div>
-              </div>
-            </div>
-          </div>
+      <div class="stage">
+        <div class="shot-frame">
+          <img
+            src="assets/screenshots/workspace-review.png"
+            width="1280"
+            height="820"
+            alt="PDFMaster 0.8.1 desktop app with the Review ribbon tab open — Search, OCR, Compare, PDF/A, and Batch"
+          />
         </div>
-        <p class="mock-caption">Same ribbon tabs as the desktop app — not a separate web UI. Install PDFMaster to use the real workspace.</p>
+        <p class="shot-caption">Actual PDFMaster 0.8.1 window — this site is the install page; the app runs on your PC.</p>
       </div>
     </header>
 
@@ -570,6 +518,16 @@ python installer/build_installer.py --clean --nsis</code></pre>
         <article class="card"><div class="kicker">Security</div><h3>AES on your terms</h3><p>Password-protect or unlock a copy. Security info stays on the desk — encryption never requires an account.</p></article>
         <article class="card"><div class="kicker">Organize</div><h3>Pages under control</h3><p>Reorder, rotate, duplicate, insert blanks, import pages, print with preview, export PNG/JPEG up to 600 dpi.</p></article>
         <article class="card"><div class="kicker">Craft</div><h3>Theme that follows you</h3><p>System light/dark, soft page shadows, HiDPI SVG icons — commercial density without cruelty.</p></article>
+      </div>
+      <div class="shot-row">
+        <figure class="shot-card">
+          <img src="assets/screenshots/welcome.png" width="1280" height="820" alt="PDFMaster welcome screen showing version 0.8.1 and Open PDF" loading="lazy" />
+          <figcaption>Welcome home — version on screen, drop zone, recent files.</figcaption>
+        </figure>
+        <figure class="shot-card">
+          <img src="assets/screenshots/workspace-markup.png" width="1280" height="820" alt="PDFMaster Markup tab with highlight, pen, note, watermark, and stamp tools" loading="lazy" />
+          <figcaption>Markup tab — highlights, notes, Watermark and Stamp.</figcaption>
+        </figure>
       </div>
     </section>
 
