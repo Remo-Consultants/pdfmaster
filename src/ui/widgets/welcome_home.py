@@ -1,4 +1,4 @@
-"""Brand-forward empty home — drop zone, open CTA, and recent files."""
+"""Home screen and the recent-files pane."""
 
 from __future__ import annotations
 
@@ -61,20 +61,20 @@ class WelcomeHome(QWidget):
 
         self._mark = QLabel()
         self._mark.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._mark.setFixedSize(72, 72)
+        self._mark.setFixedSize(48, 48)
         self._load_mark()
         card_layout.addWidget(self._mark, 0, Qt.AlignmentFlag.AlignHCenter)
 
         self._brand = QLabel(APP_NAME)
         brand_font = QFont(self.font())
-        brand_font.setPointSize(28)
+        brand_font.setPointSize(22)
         brand_font.setWeight(QFont.Weight.DemiBold)
         brand_font.setLetterSpacing(QFont.SpacingType.PercentageSpacing, 98)
         self._brand.setFont(brand_font)
         self._brand.setAlignment(Qt.AlignmentFlag.AlignCenter)
         card_layout.addWidget(self._brand)
 
-        self._tagline = QLabel("Open a PDF. Work stays on your machine.")
+        self._tagline = QLabel("The desk, not the cloud.")
         self._tagline.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._tagline.setWordWrap(True)
         card_layout.addWidget(self._tagline)
@@ -83,14 +83,7 @@ class WelcomeHome(QWidget):
         self._version.setAlignment(Qt.AlignmentFlag.AlignCenter)
         card_layout.addWidget(self._version)
 
-        self._features = QLabel(
-            "Sidebar — Home · Markup · Edit · Organize · Review · View"
-        )
-        self._features.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._features.setWordWrap(True)
-        card_layout.addWidget(self._features)
-
-        card_layout.addSpacing(8)
+        card_layout.addSpacing(4)
 
         actions = QHBoxLayout()
         actions.setSpacing(10)
@@ -111,33 +104,6 @@ class WelcomeHome(QWidget):
         self._card.setMinimumWidth(420)
         self._card.setMaximumWidth(560)
 
-        root.addSpacing(28)
-
-        self._recent_label = QLabel("Recent")
-        recent_font = QFont(self.font())
-        recent_font.setPointSize(11)
-        recent_font.setWeight(QFont.Weight.DemiBold)
-        self._recent_label.setFont(recent_font)
-        self._recent_label.setMaximumWidth(560)
-        root.addWidget(self._recent_label, 0, Qt.AlignmentFlag.AlignHCenter)
-
-        self._recent_list = QListWidget()
-        self._recent_list.setObjectName("welcomeRecent")
-        self._recent_list.setMaximumWidth(560)
-        self._recent_list.setMinimumHeight(120)
-        self._recent_list.setMaximumHeight(200)
-        self._recent_list.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self._recent_list.itemActivated.connect(self._on_recent_activated)
-        self._recent_list.itemClicked.connect(self._on_recent_activated)
-        root.addWidget(self._recent_list, 0, Qt.AlignmentFlag.AlignHCenter)
-
-        self._empty_recent = QLabel("No recent files yet")
-        self._empty_recent.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._empty_recent.setMaximumWidth(560)
-        root.addWidget(self._empty_recent, 0, Qt.AlignmentFlag.AlignHCenter)
-
         root.addStretch(2)
 
         self._opacity = QGraphicsOpacityEffect(self)
@@ -149,11 +115,9 @@ class WelcomeHome(QWidget):
         self._fade.setEasingCurve(QEasingCurve.Type.OutCubic)
 
         self.apply_scheme(scheme)
-        self.refresh_recents()
 
     def showEvent(self, event) -> None:  # noqa: N802 - Qt override
         super().showEvent(event)
-        self.refresh_recents()
         self._opacity.setOpacity(0.0)
         self._fade.stop()
         self._fade.start()
@@ -164,8 +128,8 @@ class WelcomeHome(QWidget):
             if not pix.isNull():
                 self._mark.setPixmap(
                     pix.scaled(
-                        72,
-                        72,
+                        48,
+                        48,
                         Qt.AspectRatioMode.KeepAspectRatio,
                         Qt.TransformationMode.SmoothTransformation,
                     )
@@ -178,8 +142,8 @@ class WelcomeHome(QWidget):
         self._scheme = scheme
         text = theme_color("window_text", scheme)
         muted = theme_color("muted", scheme)
-        surface = theme_color("surface", scheme)
-        self.setStyleSheet(f"WelcomeHome {{ background: {surface}; }}")
+        window = theme_color("window", scheme)
+        self.setStyleSheet(f"WelcomeHome {{ background: {window}; }}")
         self._brand.setStyleSheet(f"color: {text}; background: transparent;")
         self._tagline.setStyleSheet(
             f"color: {muted}; font-size: 14px; background: transparent;"
@@ -188,51 +152,12 @@ class WelcomeHome(QWidget):
         self._version.setStyleSheet(
             f"color: {accent}; font-size: 13px; font-weight: 600; background: transparent;"
         )
-        self._features.setStyleSheet(
-            f"color: {muted}; font-size: 12px; background: transparent; padding: 0 8px;"
-        )
         self._hint.setStyleSheet(
-            f"color: {muted}; font-size: 12px; background: transparent;"
-        )
-        self._recent_label.setStyleSheet(
-            f"color: {text}; background: transparent; margin-top: 4px;"
-        )
-        self._empty_recent.setStyleSheet(
             f"color: {muted}; font-size: 12px; background: transparent;"
         )
         # Force QSS property refresh on the drop zone.
         self._card.style().unpolish(self._card)
         self._card.style().polish(self._card)
-
-    def refresh_recents(self) -> None:
-        """Reload the recent-files list from disk."""
-        self._recent_list.clear()
-        try:
-            recent = FileHandler.get_recent_files(CONFIG_DIR)[:MAX_RECENT_FILES]
-        except Exception as exc:  # noqa: BLE001
-            logger.debug("Could not load recent files: %s", exc)
-            recent = []
-
-        if not recent:
-            self._recent_list.hide()
-            self._empty_recent.show()
-            return
-
-        self._empty_recent.hide()
-        self._recent_list.show()
-        for path_str in recent:
-            path = Path(path_str)
-            item = QListWidgetItem(path.name)
-            item.setData(Qt.ItemDataRole.UserRole, str(path))
-            item.setToolTip(str(path))
-            if APP_ICON_PATH.is_file():
-                item.setIcon(QIcon(str(APP_ICON_PATH)))
-            self._recent_list.addItem(item)
-
-    def _on_recent_activated(self, item: QListWidgetItem) -> None:
-        path = item.data(Qt.ItemDataRole.UserRole)
-        if path:
-            self.path_requested.emit(str(path))
 
     # ------------------------------------------------------------------
     # Drag and drop
@@ -273,3 +198,65 @@ class WelcomeHome(QWidget):
             return
         event.acceptProposedAction()
         self.path_requested.emit(paths[0])
+
+
+class RecentFilesPane(QWidget):
+    """Recent PDFs, shown in the right dock on the home screen."""
+
+    path_requested = Signal(str)
+
+    def __init__(self, scheme: str = "light", parent: Optional[QWidget] = None) -> None:
+        super().__init__(parent)
+        self._scheme = scheme
+        self.setObjectName("recentPane")
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setSpacing(8)
+
+        self._empty = QLabel("No recent files yet")
+        self._empty.setWordWrap(True)
+        layout.addWidget(self._empty)
+
+        self._list = QListWidget()
+        self._list.setObjectName("welcomeRecent")
+        self._list.setFrameShape(QFrame.Shape.NoFrame)
+        self._list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self._list.itemActivated.connect(self._on_activated)
+        self._list.itemClicked.connect(self._on_activated)
+        layout.addWidget(self._list, 1)
+
+        self.apply_scheme(scheme)
+        self.refresh()
+
+    def apply_scheme(self, scheme: str) -> None:
+        self._scheme = scheme
+        muted = theme_color("muted", scheme)
+        self._empty.setStyleSheet(f"color: {muted}; font-size: 12px; background: transparent;")
+
+    def refresh(self) -> None:
+        self._list.clear()
+        try:
+            recent = FileHandler.get_recent_files(CONFIG_DIR)[:MAX_RECENT_FILES]
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("Could not load recent files: %s", exc)
+            recent = []
+        if not recent:
+            self._list.hide()
+            self._empty.show()
+            return
+        self._empty.hide()
+        self._list.show()
+        for path_str in recent:
+            path = Path(path_str)
+            item = QListWidgetItem(path.name)
+            item.setData(Qt.ItemDataRole.UserRole, str(path))
+            item.setToolTip(str(path))
+            if APP_ICON_PATH.is_file():
+                item.setIcon(QIcon(str(APP_ICON_PATH)))
+            self._list.addItem(item)
+
+    def _on_activated(self, item: QListWidgetItem) -> None:
+        path = item.data(Qt.ItemDataRole.UserRole)
+        if path:
+            self.path_requested.emit(str(path))

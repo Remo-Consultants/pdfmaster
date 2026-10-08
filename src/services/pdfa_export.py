@@ -1,16 +1,18 @@
 """PDF/A-2 export using Ghostscript.
 
 Searchable text, deskew, and rotation stay inside PDFMaster. A real PDF/A
-file still needs Ghostscript's PDF writer, so this module calls ``gswin64c``
-or ``gs`` directly. It does not call OCRmyPDF.
+file still needs Ghostscript's PDF writer. PDFMaster calls the Ghostscript
+binary shipped in ``vendor/``, and does not call OCRmyPDF.
 """
 
 from __future__ import annotations
 
-import shutil
 import subprocess
 from pathlib import Path
 from typing import List, Optional
+
+from src.services.bundled_tools import ghostscript_env
+from src.services.bundled_tools import ghostscript_executable as bundled_ghostscript
 
 
 class PdfaExportError(Exception):
@@ -18,12 +20,9 @@ class PdfaExportError(Exception):
 
 
 def ghostscript_executable() -> Optional[str]:
-    """Return a Ghostscript console executable on PATH, if one is installed."""
-    for name in ("gswin64c", "gswin32c", "gs"):
-        found = shutil.which(name)
-        if found:
-            return found
-    return None
+    """Return the bundled Ghostscript console executable, if it is present."""
+    found = bundled_ghostscript()
+    return str(found) if found else None
 
 
 def find_srgb_icc(gs_executable: str) -> Optional[Path]:
@@ -87,7 +86,8 @@ def export_pdfa(source: Path, destination: Path) -> Path:
     gs = ghostscript_executable()
     if not gs:
         raise PdfaExportError(
-            "PDF/A export needs Ghostscript (gswin64c or gs) installed and on PATH."
+            "PDF/A export needs the Ghostscript files shipped with PDFMaster. "
+            "From a source checkout, run scripts/fetch_bundled_tools.py."
         )
     icc = find_srgb_icc(gs)
     if icc is None:
@@ -100,11 +100,14 @@ def export_pdfa(source: Path, destination: Path) -> Path:
     prefix_path.write_text(pdfa_prefix(icc), encoding="ascii", errors="replace")
     command = build_pdfa_command(gs, prefix_path, Path(source), destination)
     try:
+        flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
         completed = subprocess.run(
             command,
             check=False,
             capture_output=True,
             text=True,
+            env=ghostscript_env(Path(gs)),
+            creationflags=flags,
         )
     finally:
         prefix_path.unlink(missing_ok=True)

@@ -99,6 +99,21 @@ def test_orientation_parser_reads_rotate(monkeypatch):
     assert orientation_correction(image) == 90
 
 
+def test_bundled_tesseract_is_preferred(tmp_path, monkeypatch):
+    from src.services import bundled_tools
+
+    install = tmp_path / "vendor" / "tesseract"
+    data = install / "tessdata"
+    data.mkdir(parents=True)
+    exe = install / "tesseract.exe"
+    exe.write_bytes(b"")
+    (data / "eng.traineddata").write_bytes(b"trained")
+    monkeypatch.setattr(bundled_tools, "vendor_root", lambda: tmp_path / "vendor")
+    found = bundled_tools.tesseract_executable()
+    assert found == exe
+    assert bundled_tools.tessdata_dir(found) == data
+
+
 def test_pdfa_command_is_ghostscript_not_ocrmypdf(tmp_path):
     prefix = tmp_path / "def.ps"
     source = tmp_path / "in.pdf"

@@ -69,21 +69,23 @@ FIT_MARGIN_PX = 8
 PAGE_GAP = 16
 PAGE_MARGIN = 16
 # Shadow is drawn as multiple layers for a soft, realistic look.
-SHADOW_LAYERS = 4
+SHADOW_LAYERS = 2
 SHADOW_BASE_OFFSET = 1
-SHADOW_SPREAD = 8
+SHADOW_SPREAD = 4
 # Minimum drag in device pixels before it counts as a selection.
 MIN_DRAG_PX = 3
 # Render this many screens beyond the viewport so scrolling stays smooth.
 PREFETCH_SCREENS = 0.5
 # Coalesce render requests while the user is still scrolling.
 SCROLL_SETTLE_MS = 45
+# Wait until a Ctrl+wheel flurry settles before rasterizing a sharp page.
+ZOOM_SETTLE_MS = 120
 
 
 class _RenderSignals(QObject):
     """Signal carrier for render tasks (QRunnable cannot own signals)."""
 
-    finished = Signal(int, int, float, QImage)  # generation, page, zoom, image
+    finished = Signal(int, int, float, float, QImage)  # generation, page, zoom, ratio, image
     failed = Signal(int, int, str)              # generation, page, message
 
 
@@ -95,6 +97,7 @@ class _RenderTask(QRunnable):
         document: Document,
         page_num: int,
         zoom: float,
+        pixel_ratio: float,
         generation: int,
         signals: _RenderSignals,
     ) -> None:
@@ -102,6 +105,7 @@ class _RenderTask(QRunnable):
         self._document = document
         self._page_num = page_num
         self._zoom = zoom
+        self._pixel_ratio = pixel_ratio
         self._generation = generation
         self._signals = signals
         self.setAutoDelete(True)
@@ -110,9 +114,15 @@ class _RenderTask(QRunnable):
         try:
             if not self._document.is_open:
                 return
-            image = self._document.render_page_to_image(self._page_num, zoom=self._zoom)
+            image = self._document.render_page_to_image(
+                self._page_num, zoom=self._zoom * self._pixel_ratio
+            )
             self._signals.finished.emit(
-                self._generation, self._page_num, self._zoom, pil_to_qimage(image)
+                self._generation,
+                self._page_num,
+                self._zoom,
+                self._pixel_ratio,
+                pil_to_qimage(image),
             )
         except Exception as exc:  # noqa: BLE001 - worker must never raise
             logger.error("Background render of page %s failed: %s", self._page_num, exc)
@@ -151,6 +161,12 @@ class PageCanvas(QWidget):
                 return
         super().mouseReleaseEvent(event)
 
+    def wheelEvent(self, event: QWheelEvent) -> None:  # noqa: N802
+        if self._viewer.handle_wheel(event.position(), event):
+            event.accept()
+            return
+        event.ignore()
+
 
 class DocumentViewer(QScrollArea):
     """Scrolls continuously through a document, rendering pages on demand."""
@@ -176,7 +192,7 @@ class DocumentViewer(QScrollArea):
 
         # page -> rect in canvas coordinates
         self._layout: Dict[int, QRectF] = {}
-        self._cache: "OrderedDict[Tuple[int, float], QPixmap]" = OrderedDict()
+        self._cache: "OrderedDict[Tuple[int, float, float], QPixmap]" = OrderedDict()
         self._cache_bytes = 0
         self._size_cache: Dict[int, Tuple[float, float]] = {}
         self._pending: set = set()
@@ -199,6 +215,11 @@ class DocumentViewer(QScrollArea):
         self._settle.setSingleShot(True)
         self._settle.setInterval(SCROLL_SETTLE_MS)
         self._settle.timeout.connect(self._on_scroll_settled)
+        self._zoom_settle = QTimer(self)
+        self._zoom_settle.setSingleShot(True)
+        self._zoom_settle.setInterval(ZOOM_SETTLE_MS)
+        self._zoom_settle.timeout.connect(self._on_zoom_settled)
+        self._zooming = False
 
         self.setWidgetResizable(False)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -267,9 +288,16 @@ class DocumentViewer(QScrollArea):
         """A page's rectangle in canvas coordinates."""
         return self._layout.get(page)
 
+    def _pixel_ratio(self) -> float:
+        """Screen pixels per logical pixel. Pages are rasterized at this scale."""
+        ratio = float(self._canvas.devicePixelRatioF() or 1.0)
+        return round(max(1.0, ratio), 2)
+
     def page_pixmap(self, page: int) -> Optional[QPixmap]:
         """The rendered pixmap for a page at the current zoom, if cached."""
-        return self._cache.get((page, round(self._zoom_level, 4)))
+        return self._cache.get(
+            (page, round(self._zoom_level, 4), self._pixel_ratio())
+        )
 
     # ------------------------------------------------------------------
     # Document lifecycle
@@ -403,6 +431,7 @@ class DocumentViewer(QScrollArea):
             return
 
         zoom = round(self._zoom_level, 4)
+        ratio = self._pixel_ratio()
         centre = self._viewport_rect().center().y()
         wanted = sorted(
             self.visible_pages(),
@@ -411,12 +440,14 @@ class DocumentViewer(QScrollArea):
 
         queued = 0
         for page in wanted:
-            key = (page, zoom)
+            key = (page, zoom, ratio)
             if key in self._cache or key in self._pending:
                 continue
             self._pending.add(key)
             self._pool.start(
-                _RenderTask(self._document, page, zoom, self._generation, self._signals)
+                _RenderTask(
+                    self._document, page, zoom, ratio, self._generation, self._signals
+                )
             )
             queued += 1
 
@@ -427,23 +458,29 @@ class DocumentViewer(QScrollArea):
             self.render_finished.emit(self._current_page)
 
     def _on_render_finished(
-        self, generation: int, page: int, zoom: float, qimage: QImage
+        self, generation: int, page: int, zoom: float, pixel_ratio: float, qimage: QImage
     ) -> None:
         """Store and show a completed render, discarding stale ones."""
-        self._pending.discard((page, zoom))
+        ratio = round(float(pixel_ratio), 2)
+        self._pending.discard((page, zoom, ratio))
         if generation != self._generation or self._document is None:
             logger.debug("Discarding stale render of page %s", page)
             return
         if abs(zoom - round(self._zoom_level, 4)) > 0.0001:
             return
-        self._store_cache((page, zoom), QPixmap.fromImage(qimage))
+        if abs(ratio - self._pixel_ratio()) > 0.01:
+            return
+        pixmap = QPixmap.fromImage(qimage)
+        pixmap.setDevicePixelRatio(ratio)
+        self._store_cache((page, zoom, ratio), pixmap)
+        self._drop_other_zooms(page, zoom, ratio)
         rect = self._layout.get(page)
         if rect is not None:
             self._canvas.update(self._to_widget_rect(rect))
         self.render_finished.emit(page)
 
     def _on_render_failed(self, generation: int, page: int, message: str) -> None:
-        self._pending.discard((page, round(self._zoom_level, 4)))
+        self._pending = {key for key in self._pending if key[0] != page}
         if generation != self._generation:
             return
         logger.warning("Render failed for page %s: %s", page, message)
@@ -461,6 +498,7 @@ class DocumentViewer(QScrollArea):
         """Paint the background, then every page touching ``dirty``."""
         painter = QPainter(widget)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
         try:
             canvas_color = QColor(theme_color("canvas", self._scheme))
             painter.fillRect(dirty, canvas_color)
@@ -469,6 +507,7 @@ class DocumentViewer(QScrollArea):
                 return
 
             zoom = round(self._zoom_level, 4)
+            ratio = self._pixel_ratio()
             dirty_f = QRectF(dirty)
             shadow_base = QColor(theme_color("shadow", self._scheme))
 
@@ -485,11 +524,19 @@ class DocumentViewer(QScrollArea):
                 painter.drawRect(rect)
 
                 # Page content.
-                pixmap = self._cache.get((page, zoom))
+                pixmap = self._cache.get((page, zoom, ratio))
                 if pixmap is not None:
                     painter.drawPixmap(rect.topLeft(), pixmap)
                 else:
-                    self._paint_placeholder(painter, rect, page)
+                    fallback = self._nearest_pixmap(page, ratio)
+                    if fallback is not None:
+                        painter.drawPixmap(
+                            rect,
+                            fallback,
+                            QRectF(0, 0, fallback.width(), fallback.height()),
+                        )
+                    else:
+                        self._paint_placeholder(painter, rect, page)
 
                 # Subtle highlight on top and left edges (light source).
                 self._paint_paper_edge(painter, rect)
@@ -578,7 +625,7 @@ class DocumentViewer(QScrollArea):
     def _pixmap_bytes(pixmap: QPixmap) -> int:
         return pixmap.width() * pixmap.height() * pixmap.depth() // 8
 
-    def _store_cache(self, key: Tuple[int, float], pixmap: QPixmap) -> None:
+    def _store_cache(self, key: Tuple[int, float, float], pixmap: QPixmap) -> None:
         if key in self._cache:
             self._cache_bytes -= self._pixmap_bytes(self._cache[key])
         self._cache[key] = pixmap
@@ -602,10 +649,51 @@ class DocumentViewer(QScrollArea):
         logger.debug("Render cache: %s entries, %.1f MB",
                      len(self._cache), self._cache_bytes / (1024 * 1024))
 
+    def _nearest_pixmap(self, page: int, ratio: float) -> Optional[QPixmap]:
+        """Closest cached raster for a page, used while a sharper one renders."""
+        best: Optional[QPixmap] = None
+        best_dist: Optional[float] = None
+        target = round(self._zoom_level, 4)
+        for (cached_page, zoom, cached_ratio), pixmap in self._cache.items():
+            if cached_page != page or abs(cached_ratio - ratio) > 0.01:
+                continue
+            dist = abs(zoom - target)
+            if best is None or dist < best_dist:
+                best = pixmap
+                best_dist = dist
+        return best
+
+    def _drop_other_zooms(self, page: int, zoom: float, ratio: float) -> None:
+        """Once a sharp page is ready, drop the scaled stand-in."""
+        for key in [
+            k for k in self._cache
+            if k[0] == page and (abs(k[1] - zoom) > 0.0001 or abs(k[2] - ratio) > 0.01)
+        ]:
+            self._cache_bytes -= self._pixmap_bytes(self._cache.pop(key))
+
     def _release_offscreen(self, visible: set) -> None:
-        """Drop pixmaps for other zoom levels and far-away pages."""
+        """Drop far-away pages. Keep one stand-in raster for pages still on screen."""
         zoom = round(self._zoom_level, 4)
-        for key in [k for k in self._cache if abs(k[1] - zoom) > 0.0001]:
+        ratio = self._pixel_ratio()
+        keep = {
+            page for page in visible
+            if (page, zoom, ratio) not in self._cache
+        }
+        stand_in: Dict[int, Tuple[int, float, float]] = {}
+        for key in self._cache:
+            page = key[0]
+            if page not in keep or abs(key[2] - ratio) > 0.01:
+                continue
+            current = stand_in.get(page)
+            if current is None or abs(key[1] - zoom) < abs(current[1] - zoom):
+                stand_in[page] = key
+        for key in list(self._cache):
+            page, key_zoom, key_ratio = key
+            current = abs(key_zoom - zoom) < 0.0001 and abs(key_ratio - ratio) < 0.01
+            if current:
+                continue
+            if stand_in.get(page) == key:
+                continue
             self._cache_bytes -= self._pixmap_bytes(self._cache.pop(key))
         self._enforce_budget(visible)
 
@@ -630,7 +718,8 @@ class DocumentViewer(QScrollArea):
         if self._document is None:
             return
         self._update_current_page()
-        self._schedule_request()
+        if not self._zooming:
+            self._schedule_request()
 
     def _update_current_page(self) -> None:
         """The current page is the one crossing the viewport's middle."""
@@ -691,19 +780,65 @@ class DocumentViewer(QScrollArea):
     # ------------------------------------------------------------------
     # Zoom
     # ------------------------------------------------------------------
-    def set_zoom(self, zoom_level: float) -> None:
-        """Set zoom factor, clamped to the supported range."""
+    def set_zoom(self, zoom_level: float, anchor: Optional[QPointF] = None) -> None:
+        """Set zoom factor, clamped to the supported range.
+
+        ``anchor`` is a point in the viewport. When it is set, that spot
+        in the document stays under the pointer instead of jumping back
+        to the top of the current page.
+        """
         clamped = max(ZOOM_MIN_FACTOR, min(ZOOM_MAX_FACTOR, float(zoom_level)))
         if abs(clamped - self._zoom_level) < 0.0001:
             return
-        anchor = self._current_page
+        held = self._capture_anchor(anchor) if anchor is not None else None
+        page = self._current_page
+        self._zooming = True
         self._zoom_level = clamped
         self._rebuild_layout()
-        self._scroll_to_page(anchor, emit=False)
-        self._request_visible()
+        if held is not None and anchor is not None:
+            self._restore_anchor(held, anchor)
+        else:
+            self._scroll_to_page(page, emit=False)
+        # Keep the previous raster on screen, scaled, until the wheel pauses.
+        self._zoom_settle.start()
         self._canvas.update()
         self.zoom_changed.emit(self._zoom_level)
         logger.debug("Viewer zoom -> %.0f%%", self._zoom_level * 100)
+
+    def _on_zoom_settled(self) -> None:
+        self._zooming = False
+        self._request_visible()
+
+    def _capture_anchor(self, viewport_point: QPointF) -> Tuple[int, float, float]:
+        """Remember which fraction of a page sits under ``viewport_point``."""
+        canvas_point = QPointF(
+            viewport_point.x() + self.horizontalScrollBar().value(),
+            viewport_point.y() + self.verticalScrollBar().value(),
+        )
+        page = self.page_at(canvas_point)
+        if page is None and self._layout:
+            page = self._current_page
+            rect = self._layout.get(page)
+        else:
+            rect = self._layout.get(page) if page is not None else None
+        if page is None or rect is None or rect.width() <= 0 or rect.height() <= 0:
+            return (-1, canvas_point.x(), canvas_point.y())
+        return (
+            page,
+            (canvas_point.x() - rect.left()) / rect.width(),
+            (canvas_point.y() - rect.top()) / rect.height(),
+        )
+
+    def _restore_anchor(self, held: Tuple[int, float, float], viewport_point: QPointF) -> None:
+        """Scroll so the captured page fraction lands on ``viewport_point``."""
+        page, frac_x, frac_y = held
+        rect = self._layout.get(page)
+        if rect is None:
+            return
+        canvas_x = rect.left() + frac_x * rect.width()
+        canvas_y = rect.top() + frac_y * rect.height()
+        self.horizontalScrollBar().setValue(int(round(canvas_x - viewport_point.x())))
+        self.verticalScrollBar().setValue(int(round(canvas_y - viewport_point.y())))
 
     def zoom_in(self, step: float = ZOOM_STEP_FACTOR) -> None:
         self.set_zoom(self._zoom_level + step)
@@ -934,14 +1069,28 @@ class DocumentViewer(QScrollArea):
     # ------------------------------------------------------------------
     # Wheel
     # ------------------------------------------------------------------
+    def handle_wheel(self, canvas_position: QPointF, event: QWheelEvent) -> bool:
+        """Zoom toward the pointer when Ctrl is held. Plain scrolling is left alone."""
+        if not (event.modifiers() & Qt.KeyboardModifier.ControlModifier):
+            return False
+        if self._document is None:
+            return True
+        notches = event.angleDelta().y() / 120.0
+        if notches == 0:
+            notches = event.pixelDelta().y() / 80.0
+        if abs(notches) < 0.01:
+            return True
+        viewport_point = QPointF(
+            canvas_position.x() - self.horizontalScrollBar().value(),
+            canvas_position.y() - self.verticalScrollBar().value(),
+        )
+        self.set_zoom(self._zoom_level * (1.05 ** notches), viewport_point)
+        return True
+
     def wheelEvent(self, event: QWheelEvent) -> None:  # noqa: N802
         """Ctrl+wheel zooms; otherwise scroll normally."""
-        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
-            delta = event.angleDelta().y()
-            if delta > 0:
-                self.zoom_in()
-            elif delta < 0:
-                self.zoom_out()
+        mapped = self._canvas.mapFrom(self, event.position().toPoint())
+        if self.handle_wheel(QPointF(mapped), event):
             event.accept()
             return
         super().wheelEvent(event)

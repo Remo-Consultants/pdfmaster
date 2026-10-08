@@ -85,6 +85,9 @@ Scripts:
 - [`pdfmaster.spec`](pdfmaster.spec) — PyInstaller layout  
 - [`installer/build_installer.py`](installer/build_installer.py) — orchestrates clean / zip / NSIS  
 - [`installer/pdfmaster.nsi`](installer/pdfmaster.nsi) — Start Menu, desktop, Add/Remove Programs, optional PDF open-with
+- [`installer/BUNDLE_LICENSE.txt`](installer/BUNDLE_LICENSE.txt) — installer license page (MIT, plus Ghostscript AGPL-3.0 and Tesseract Apache-2.0)
+
+Fetch Tesseract and Ghostscript with `scripts/fetch_bundled_tools.py` before building a package that includes OCR and PDF/A. That script also refreshes the notice files. The package omits Tesseract's training tools and Java jars. Ghostscript is copied with `doc/COPYING` and `bin/SOURCE.txt`.
 
 ### Attach artifacts to a GitHub release
 
@@ -119,7 +122,7 @@ Logs: `%USERPROFILE%\.pdfmaster\logs\pdfmaster.log`
 | --- | --- |
 | Setup blocked by SmartScreen | More info → Run anyway (unsigned local builds) |
 | Missing `PDFMaster.exe` in ZIP | Extract the whole archive; run from `PDFMaster\` folder |
-| OCR says unavailable | Install Tesseract or `pip install easyocr` (source builds) |
+| OCR says unavailable | Run `.\venv\Scripts\python scripts\fetch_bundled_tools.py` so Tesseract is inside `vendor/` |
 | Source: `No module named src` | `cd` into the repo root before `python -m src.main` |
 | PyInstaller build fails | Use the project venv: `.\venv\Scripts\python.exe installer/build_installer.py` |
 

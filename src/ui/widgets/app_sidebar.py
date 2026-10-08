@@ -1,18 +1,14 @@
-"""Left navigation shell — brand, WORK modes, and Open / Recents."""
+"""Left navigation shell — brand and document modes."""
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import List, Optional, Sequence, Tuple
+from typing import Optional, Tuple
 
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtCore import Qt, QSize, Signal
+from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
-    QFrame,
     QHBoxLayout,
     QLabel,
-    QMenu,
-    QPushButton,
     QSizePolicy,
     QToolButton,
     QVBoxLayout,
@@ -20,7 +16,18 @@ from PySide6.QtWidgets import (
 )
 
 from src.constants import APP_ICON_PATH, APP_NAME, APP_VERSION
+from src.ui.icons import action_icon
 from src.ui.theme import color as theme_color
+
+_NAV_ICONS = {
+    "home": "nav_home",
+    "markup": "nav_markup",
+    "edit": "nav_edit",
+    "organize": "nav_organize",
+    "review": "nav_review",
+    "sign": "nav_sign",
+    "view": "nav_view",
+}
 
 # Internal mode id → label shown in the sidebar.
 WORK_MODES: Tuple[Tuple[str, str], ...] = (
@@ -29,10 +36,11 @@ WORK_MODES: Tuple[Tuple[str, str], ...] = (
     ("edit", "Edit"),
     ("organize", "Organize"),
     ("review", "Review"),
+    ("sign", "Sign"),
     ("view", "View"),
 )
 
-SIDEBAR_WIDTH = 220
+SIDEBAR_WIDTH = 200
 
 
 class AppSidebar(QWidget):
@@ -47,7 +55,6 @@ class AppSidebar(QWidget):
         self._scheme = scheme
         self._mode = "home"
         self._nav_buttons: dict[str, QToolButton] = {}
-        self._recent_paths: List[str] = []
         self._document_modes_enabled = False
 
         self.setObjectName("appSidebar")
@@ -55,8 +62,8 @@ class AppSidebar(QWidget):
         self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
 
         root = QVBoxLayout(self)
-        root.setContentsMargins(14, 16, 14, 16)
-        root.setSpacing(4)
+        root.setContentsMargins(12, 20, 12, 16)
+        root.setSpacing(2)
 
         brand_row = QHBoxLayout()
         brand_row.setSpacing(10)
@@ -83,32 +90,23 @@ class AppSidebar(QWidget):
         for mode_id, label in WORK_MODES:
             btn = QToolButton()
             btn.setObjectName("sidebarNav")
-            btn.setText(f"  {label}")
+            btn.setText(label)
             btn.setCheckable(True)
-            btn.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+            btn.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+            btn.setIconSize(QSize(18, 18))
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-            btn.setFixedHeight(36)
+            btn.setFixedHeight(34)
             btn.clicked.connect(lambda _checked=False, m=mode_id: self.set_mode(m))
             self._nav_buttons[mode_id] = btn
             root.addWidget(btn)
 
         root.addStretch(1)
 
-        self._open_btn = QPushButton("Open PDF")
-        self._open_btn.setObjectName("sidebarOpen")
-        self._open_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._open_btn.clicked.connect(self.open_requested.emit)
-        root.addWidget(self._open_btn)
-
-        self._recents_btn = QPushButton("Recents")
-        self._recents_btn.setObjectName("sidebarGhost")
-        self._recents_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._recents_btn.clicked.connect(self._show_recents_menu)
-        root.addWidget(self._recents_btn)
-
         self._nav_buttons["home"].setChecked(True)
+        self._refresh_nav_icons()
         self.apply_scheme(scheme)
+        self.set_document_modes_enabled(False)
 
     def _load_mark(self) -> None:
         if APP_ICON_PATH.is_file():
@@ -145,32 +143,24 @@ class AppSidebar(QWidget):
             self.mode_changed.emit(mode)
 
     def set_document_modes_enabled(self, enabled: bool) -> None:
-        """When no PDF is open, keep Home selectable; grey out other modes."""
+        """Show the work list only while a PDF is open."""
         self._document_modes_enabled = enabled
+        self._section.setVisible(enabled)
         for mode_id, btn in self._nav_buttons.items():
-            if mode_id == "home":
-                btn.setEnabled(True)
-            else:
-                btn.setEnabled(enabled)
+            btn.setVisible(enabled)
+            btn.setEnabled(enabled or mode_id == "home")
         if not enabled and self._mode != "home":
             self.set_mode("home")
 
-    def set_recent_paths(self, paths: Sequence[str]) -> None:
-        self._recent_paths = [p for p in paths if p]
-        self._recents_btn.setEnabled(bool(self._recent_paths))
+    def set_recent_paths(self, paths) -> None:
+        """Kept so callers can refresh recents without a sidebar list."""
+        del paths
 
-    def _show_recents_menu(self) -> None:
-        if not self._recent_paths:
-            return
-        menu = QMenu(self)
-        for path_str in self._recent_paths:
-            path = Path(path_str)
-            action = menu.addAction(path.name)
-            action.setToolTip(path_str)
-            action.triggered.connect(
-                lambda _checked=False, p=path_str: self.recent_requested.emit(p)
-            )
-        menu.exec(self._recents_btn.mapToGlobal(self._recents_btn.rect().bottomLeft()))
+    def _refresh_nav_icons(self) -> None:
+        for mode_id, btn in self._nav_buttons.items():
+            icon_name = _NAV_ICONS.get(mode_id)
+            if icon_name:
+                btn.setIcon(action_icon(icon_name, self._scheme))
 
     def apply_scheme(self, scheme: str) -> None:
         self._scheme = scheme
@@ -178,6 +168,7 @@ class AppSidebar(QWidget):
         self._version.setStyleSheet(
             f"color: {muted}; font-size: 11px; background: transparent;"
         )
+        self._refresh_nav_icons()
         # Force QSS refresh for object-name rules.
         self.style().unpolish(self)
         self.style().polish(self)

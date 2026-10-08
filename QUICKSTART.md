@@ -56,7 +56,7 @@ Windows light or dark setting, and changes with it straight away.
 Open the **Review** ribbon tab (also under **Tools**):
 
 - **Ctrl+F** — Search Document
-- **Ctrl+Shift+T** — OCR Scanned Pages (needs tesseract or easyocr)
+- **Ctrl+Shift+T** — OCR Scanned Pages (uses the Tesseract copy inside the app)
 - **Ctrl+T** — Extract Text panel
 - **Compare** — text diff (optional visual/rendered compare)
 - **PDF/A** — declaration and basic findings

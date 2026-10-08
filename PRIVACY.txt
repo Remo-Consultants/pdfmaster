@@ -1,0 +1,33 @@
+Privacy notice
+PDFMaster
+Effective 8 October 2026
+
+This notice describes what PDFMaster stores on your device. It covers the Windows application and the mobile reader. PDFMaster Contributors do not operate an account system for these applications and do not receive your documents.
+
+1. No upload and no account
+
+The applications do not send your files to PDFMaster Contributors. They do not include telemetry. The Android release build does not request Internet access. A debug build of the Android app requests Internet access only so Flutter's development tools can connect to the app on your own machine.
+
+A file leaves the device when you save it elsewhere, print it, or, on the mobile reader, use the share sheet. The share sheet sends that file only to an app you choose.
+
+2. What the Windows application stores
+
+All of this stays under your user profile, in the folder .pdfmaster inside your home directory.
+
+- recent_files.txt stores the full path of files you open, so the application can show a recent list.
+- logs/pdfmaster.log is a rotating log, about 2 MB, with up to five older files. It records file names and full paths. It also records the words you type into search, redaction, and find-and-replace. Those words can be text from the document. The log is not uploaded.
+
+The installer writes the install location and a PDF open-with registration into the Windows registry on that computer.
+
+3. What the mobile reader stores
+
+The reader stores up to ten recent file paths and names on the device, in the app's private preferences. It does not upload that list.
+
+4. How to remove it
+
+- Windows: quit PDFMaster and delete the .pdfmaster folder in your home directory. That removes the recent list and the logs. Uninstalling the application removes the program files. The registry open-with entry is removed by the uninstaller.
+- Mobile: clear the app's storage, or uninstall the app. That removes the recent list.
+
+5. What this notice does not change
+
+Your documents remain yours. The terms of use are in TERMS_OF_USE.txt. License notices for other people's code are in THIRD_PARTY_NOTICES.txt.

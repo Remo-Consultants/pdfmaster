@@ -24,6 +24,8 @@ from PySide6.QtWidgets import (
     QInputDialog,
     QMainWindow,
     QMessageBox,
+    QPlainTextEdit,
+    QPushButton,
     QSizePolicy,
     QSlider,
     QSpinBox,
@@ -69,6 +71,7 @@ from src.constants import ANNOT_COLORS
 from src.core.document import Document
 from src.core.history import DocumentHistory
 from src.core.pdf_handler import PDFHandler
+from src.licensing import read_notices, read_privacy, read_terms
 from src.ui.edit_controller import EditController
 from src.ui.dialogs.batch_dialog import BatchDialog
 from src.ui.dialogs.compare_dialog import CompareDialog, PdfaDialog
@@ -80,7 +83,7 @@ from src.ui.dialogs.security_dialog import (
     SetPasswordDialog,
 )
 from src.ui.icons import action_icon, clear_cache, swatch_icon, tool_icon
-from src.ui.theme import apply_theme, detect_scheme
+from src.ui.theme import LIGHT, apply_theme
 from src.ui.tools import PRIMARY_TOOLS, TOOL_HINTS, TOOL_LABELS, ToolMode
 from src.ui.widgets.app_sidebar import AppSidebar
 from src.ui.widgets.app_topbar import AppTopBar
@@ -91,7 +94,7 @@ from src.ui.widgets.info_panel import InfoPanel
 from src.ui.widgets.ribbon import Ribbon
 from src.ui.widgets.text_extract_panel import TextExtractPanel
 from src.ui.widgets.thumbnail_panel import ThumbnailPanel
-from src.ui.widgets.welcome_home import WelcomeHome
+from src.ui.widgets.welcome_home import RecentFilesPane, WelcomeHome
 from src.services.security_service import SecurityService
 from src.utils.exceptions import (
     FileOperationError,
@@ -123,7 +126,7 @@ class MainWindow(QMainWindow):
             | QMainWindow.DockOption.AllowTabbedDocks
         )
 
-        self._scheme = detect_scheme()
+        self._scheme = LIGHT
 
         # Central: sidebar | (topbar + context rail + welcome/tabs).
         central = QWidget()
@@ -145,6 +148,7 @@ class MainWindow(QMainWindow):
         self._topbar = AppTopBar(self)
         self._topbar.open_requested.connect(self.open_file)
         self._topbar.search_submitted.connect(self._on_top_search)
+        self._topbar.setVisible(False)
         right_layout.addWidget(self._topbar)
 
         self._ribbon = Ribbon(self)
@@ -184,7 +188,6 @@ class MainWindow(QMainWindow):
         self.create_docks()
         self.create_status_bar()
         self._apply_scheme(self._scheme)
-        self._watch_system_theme()
         self._set_document_actions_enabled(False)
         self._reload_recent_menu()
         self.update_history_actions()
@@ -210,17 +213,6 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     # Theming
     # ------------------------------------------------------------------
-    def _watch_system_theme(self) -> None:
-        """Follow Windows when the user flips between light and dark."""
-        hints = QGuiApplication.styleHints()
-        signal = getattr(hints, "colorSchemeChanged", None)
-        if signal is None:  # Qt older than 6.5
-            return
-        try:
-            signal.connect(lambda _scheme=None: self._apply_scheme(detect_scheme()))
-        except Exception as exc:  # noqa: BLE001 - theming must not break startup
-            logger.debug("Could not subscribe to colour scheme changes: %s", exc)
-
     def _apply_scheme(self, scheme: str) -> None:
         """Repaint the whole window for a light or dark colour scheme."""
         self._scheme = scheme
@@ -231,6 +223,7 @@ class MainWindow(QMainWindow):
         self._tabs.apply_scheme(scheme)
         self._ribbon.apply_scheme(scheme)
         self._welcome.apply_scheme(scheme)
+        self._recent_pane.apply_scheme(scheme)
         self._sidebar.apply_scheme(scheme)
         self._retheme_icons()
 
@@ -556,6 +549,20 @@ class MainWindow(QMainWindow):
             security_menu.addAction(self.add_signature_field_action)
 
         help_menu = menu_bar.addMenu("&Help")
+        terms_action = QAction("&Terms of use", self)
+        terms_action.setStatusTip("Terms for the official PDFMaster for Windows build")
+        terms_action.triggered.connect(self.show_terms)
+        help_menu.addAction(terms_action)
+        privacy_action = QAction("&Privacy", self)
+        privacy_action.setStatusTip("What PDFMaster stores on this computer")
+        privacy_action.triggered.connect(self.show_privacy)
+        help_menu.addAction(privacy_action)
+        notices_action = QAction("Third-party &notices", self)
+        notices_action.setStatusTip(
+            "Licenses for Ghostscript, Tesseract, and the libraries shipped with them"
+        )
+        notices_action.triggered.connect(self.show_third_party_notices)
+        help_menu.addAction(notices_action)
         about_action = QAction("&About", self)
         about_action.triggered.connect(self.show_about)
         help_menu.addAction(about_action)
@@ -604,6 +611,8 @@ class MainWindow(QMainWindow):
 
     def set_tool(self, mode: ToolMode) -> None:
         """Activate an editing tool and tell the user what it does."""
+        if mode is ToolMode.SIGN and not self._ensure_signature():
+            return
         self.viewer.set_tool(mode)
         action = self._tool_actions.get(mode)
         if action is not None and not action.isChecked():
@@ -694,7 +703,7 @@ class MainWindow(QMainWindow):
         # Zoom group.
         zoom_grp = home.add_group("Zoom")
         zoom_out_action = QAction(action_icon("zoom_out", self._scheme), "", self)
-        zoom_out_action.setToolTip("Zoom out")
+        zoom_out_action.setToolTip("Zoom out (Ctrl + scroll down)")
         zoom_out_action.triggered.connect(self.zoom_out)
         zoom_grp.add_action(zoom_out_action)
         self._icon_actions["zoom_out"] = zoom_out_action
@@ -706,12 +715,12 @@ class MainWindow(QMainWindow):
         self._zoom_slider.setPageStep(ZOOM_STEP)
         self._zoom_slider.setValue(ZOOM_DEFAULT)
         self._zoom_slider.setFixedWidth(90)
-        self._zoom_slider.setToolTip("Zoom")
+        self._zoom_slider.setToolTip("Zoom. Hold Ctrl and scroll the mouse wheel over the page.")
         self._zoom_slider.valueChanged.connect(self.slider_zoom_changed)
         zoom_grp.add_widget(self._zoom_slider)
 
         zoom_in_action = QAction(action_icon("zoom_in", self._scheme), "", self)
-        zoom_in_action.setToolTip("Zoom in")
+        zoom_in_action.setToolTip("Zoom in (Ctrl + scroll up)")
         zoom_in_action.triggered.connect(self.zoom_in)
         zoom_grp.add_action(zoom_in_action)
         self._icon_actions["zoom_in"] = zoom_in_action
@@ -851,6 +860,16 @@ class MainWindow(QMainWindow):
         if hasattr(self, "batch_action"):
             workflow_grp.add_action(self.batch_action, large=True, label="Batch")
 
+        sign_tab = ribbon.add_tab("sign", "Sign")
+        sign_grp = sign_tab.add_group("E-sign")
+        sign_grp.add_action(self._tool_actions[ToolMode.SIGN], large=True, label="Place")
+        self.create_signature_action = QAction("Create signature", self)
+        self.create_signature_action.setIcon(action_icon("nav_sign", self._scheme))
+        self.create_signature_action.setToolTip("Draw, type, or import a signature")
+        self.create_signature_action.triggered.connect(self.create_signature)
+        self._icon_actions["nav_sign"] = self.create_signature_action
+        sign_grp.add_action(self.create_signature_action, large=True, label="Create")
+
         # --- VIEW TAB ---
         view_tab = ribbon.add_tab("view", "View")
 
@@ -889,7 +908,7 @@ class MainWindow(QMainWindow):
             Qt.DockWidgetArea.LeftDockWidgetArea
             | Qt.DockWidgetArea.RightDockWidgetArea
         )
-        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self._thumb_dock)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._thumb_dock)
 
         self.bookmarks_panel = BookmarksPanel(self)
         self.bookmarks_panel.page_requested.connect(self._on_bookmark_selected)
@@ -900,12 +919,21 @@ class MainWindow(QMainWindow):
             Qt.DockWidgetArea.LeftDockWidgetArea
             | Qt.DockWidgetArea.RightDockWidgetArea
         )
-        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self._bookmarks_dock)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._bookmarks_dock)
         self.tabifyDockWidget(self._thumb_dock, self._bookmarks_dock)
         self._thumb_dock.raise_()
         # Progressive disclosure: hide side chrome until a document is open.
         self._thumb_dock.hide()
         self._bookmarks_dock.hide()
+
+        self._recent_pane = RecentFilesPane(self._scheme, self)
+        self._recent_pane.path_requested.connect(self.open_file)
+        self._recent_dock = QDockWidget("Recent", self)
+        self._recent_dock.setObjectName("recent_dock")
+        self._recent_dock.setWidget(self._recent_pane)
+        self._recent_dock.setMinimumWidth(240)
+        self._recent_dock.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._recent_dock)
 
         self.info_panel = InfoPanel(self)
         self.info_panel.delete_requested.connect(self._on_delete_annotation)
@@ -966,20 +994,28 @@ class MainWindow(QMainWindow):
             self._workspace.setCurrentWidget(self._tabs)
             self._ribbon.set_compact(False)
             self._sidebar.set_document_modes_enabled(True)
+            self._topbar.setVisible(True)
             self._topbar.set_search_enabled(True)
+            if self.document is not None:
+                self._topbar.set_document_name(self.document.filename)
             if not self._docks_auto_shown:
                 self._thumb_dock.show()
                 self._thumb_dock.raise_()
                 self.toggle_thumbs_action.setChecked(True)
                 self._docks_auto_shown = True
+            self._recent_dock.hide()
         else:
             self._workspace.setCurrentWidget(self._welcome)
             self._ribbon.set_compact(True)
             self._sidebar.set_document_modes_enabled(False)
             self._topbar.set_search_enabled(False)
+            self._topbar.set_document_name("")
+            self._topbar.setVisible(False)
             self._sidebar.set_mode("home", emit=False)
             self._ribbon.set_mode("home")
-            self._welcome.refresh_recents()
+            self._recent_pane.refresh()
+            self._recent_dock.show()
+            self._recent_dock.raise_()
             self._thumb_dock.hide()
             self._bookmarks_dock.hide()
             self._info_dock.hide()
@@ -1042,6 +1078,7 @@ class MainWindow(QMainWindow):
         self.set_tool(ToolMode.PAN)
         self._set_document_actions_enabled(True)
         self.setWindowTitle(self._format_window_title(document.filename))
+        self._topbar.set_document_name(document.filename)
         self.statusBar().showMessage(
             MSG_OPEN_SUCCESS.format(filename=document.filename, pages=document.page_count)
         )
@@ -1078,6 +1115,7 @@ class MainWindow(QMainWindow):
                 return
         self.statusBar().showMessage(MSG_SAVE_SUCCESS.format(filename=saved.name))
         self.setWindowTitle(self._format_window_title(saved.name))
+        self._topbar.set_document_name(saved.name)
 
     def save_file_as(self) -> None:
         """Save the open document to a user-chosen path."""
@@ -1095,6 +1133,7 @@ class MainWindow(QMainWindow):
             return
         self.statusBar().showMessage(MSG_SAVE_SUCCESS.format(filename=saved.name))
         self.setWindowTitle(self._format_window_title(saved.name))
+        self._topbar.set_document_name(saved.name)
 
     def _reload_recent_menu(self) -> None:
         try:
@@ -1115,7 +1154,7 @@ class MainWindow(QMainWindow):
                     )
                     self._recent_menu.addAction(action)
         self._sidebar.set_recent_paths(recent)
-        self._welcome.refresh_recents()
+        self._recent_pane.refresh()
 
     # ------------------------------------------------------------------
     # Tab management
@@ -1149,6 +1188,7 @@ class MainWindow(QMainWindow):
             self.text_extract_panel.set_document(None)
             self._set_document_actions_enabled(False)
             self.setWindowTitle(self._format_window_title())
+            self._topbar.set_document_name("")
             self.update_page_info(0)
             return
 
@@ -1161,6 +1201,7 @@ class MainWindow(QMainWindow):
             self.text_extract_panel.set_document(doc)
             self._set_document_actions_enabled(True)
             self.setWindowTitle(self._format_window_title(doc.filename))
+            self._topbar.set_document_name(doc.filename)
             self.update_page_info(self.viewer.current_page if self.viewer else 0)
             self.update_zoom_display(self.viewer.zoom_level if self.viewer else 1.0)
             self.update_history_actions()
@@ -1307,10 +1348,40 @@ class MainWindow(QMainWindow):
             (
                 f"<h3>{APP_NAME} {APP_VERSION}</h3>"
                 f"<p>{APP_DESCRIPTION}</p>"
-                f"<p>Author: {APP_AUTHOR}<br>License: {APP_LICENSE}</p>"
+                f"<p>Author: {APP_AUTHOR}<br>PDFMaster license: {APP_LICENSE}</p>"
+                "<p>This copy also runs Ghostscript 10.08.0 (AGPL-3.0) and "
+                "Tesseract 5.4.0.20240606 (Apache-2.0) as separate programs. "
+                "The Help menu has the terms of use, the privacy notice, and the "
+                "third-party notices, including PyMuPDF and the Ghostscript source.</p>"
                 "<p>Built with PySide6, PyMuPDF, and PyPDF.</p>"
             ),
         )
+
+    def show_terms(self) -> None:
+        """Show the terms of use for the official Windows build."""
+        self._show_text_document("Terms of use", read_terms())
+
+    def show_privacy(self) -> None:
+        """Show what this application stores on the computer."""
+        self._show_text_document("Privacy", read_privacy())
+
+    def show_third_party_notices(self) -> None:
+        """Show the notice that must travel with the bundled programs."""
+        self._show_text_document("Third-party notices", read_notices())
+
+    def _show_text_document(self, title: str, body: str) -> None:
+        dialog = QDialog(self)
+        dialog.setWindowTitle(title)
+        dialog.resize(720, 520)
+        layout = QVBoxLayout(dialog)
+        view = QPlainTextEdit()
+        view.setReadOnly(True)
+        view.setPlainText(body)
+        layout.addWidget(view)
+        close = QPushButton("Close")
+        close.clicked.connect(dialog.accept)
+        layout.addWidget(close)
+        dialog.exec()
 
     def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802
         """Close all tabs and exit, prompting for unsaved changes."""
@@ -1482,6 +1553,27 @@ class MainWindow(QMainWindow):
             return
         dialog = SecurityInfoDialog(self.document, self)
         dialog.exec()
+
+    def create_signature(self) -> None:
+        """Open the signature editor and keep the result for placement."""
+        from src.ui.dialogs.sign_dialog import SignDialog
+
+        dialog = SignDialog(self)
+        if dialog.exec() != SignDialog.DialogCode.Accepted:
+            return
+        self.statusBar().showMessage("Signature saved. Drag on the page to place it.")
+        self._sidebar.set_mode("sign")
+        self.set_tool(ToolMode.SIGN)
+
+    def _ensure_signature(self) -> bool:
+        from src.services.esign import signature_path
+
+        if signature_path() is not None:
+            return True
+        from src.ui.dialogs.sign_dialog import SignDialog
+
+        dialog = SignDialog(self)
+        return dialog.exec() == SignDialog.DialogCode.Accepted
 
     def add_signature_field(self) -> None:
         """Add an empty signature widget on the current page."""

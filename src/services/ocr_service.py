@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import io
 import re
-import shutil
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 
@@ -12,6 +11,7 @@ import pymupdf as fitz
 from PIL import Image
 
 from src.core.document import Document
+from src.services.bundled_tools import configure_tesseract
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -49,8 +49,8 @@ class OCRService:
     """Service for performing OCR on PDF pages.
 
     Supports multiple backends:
-    - pytesseract (default, requires tesseract-ocr installed)
-    - easyocr (optional, requires easyocr package)
+    - tesseract shipped in vendor/ (default)
+    - easyocr (optional extra; not required)
     """
 
     BACKENDS = ["tesseract", "easyocr"]
@@ -72,22 +72,23 @@ class OCRService:
         return False
 
     def _check_tesseract(self) -> bool:
-        """Check if tesseract is installed."""
+        """Check if the bundled Tesseract engine can be started."""
         if self._tesseract_available is not None:
             return self._tesseract_available
 
-        tesseract_path = shutil.which("tesseract")
-        if tesseract_path:
+        tesseract_path = configure_tesseract()
+        if not tesseract_path:
+            self._tesseract_available = False
+            logger.debug("Bundled Tesseract not available")
+            return False
+        try:
+            import pytesseract
+            pytesseract.get_tesseract_version()
             self._tesseract_available = True
             logger.debug("Tesseract found at %s", tesseract_path)
-        else:
-            try:
-                import pytesseract
-                pytesseract.get_tesseract_version()
-                self._tesseract_available = True
-            except Exception:
-                self._tesseract_available = False
-                logger.debug("Tesseract not available")
+        except Exception:
+            self._tesseract_available = False
+            logger.debug("Tesseract not available")
 
         return self._tesseract_available
 
@@ -357,6 +358,8 @@ def orientation_correction(image: Image.Image) -> int:
     Returns 0 when Tesseract orientation detection is unavailable.
     """
     try:
+        from src.services.bundled_tools import configure_tesseract
+        configure_tesseract()
         import pytesseract
     except ImportError:
         return 0

@@ -15,6 +15,9 @@ venv/
 env/
 ENV/
 
+# OCR and PDF/A programs fetched into the app (not committed)
+vendor/
+
 # Packaging
 dist/
 build/

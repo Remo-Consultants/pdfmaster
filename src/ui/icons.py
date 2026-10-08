@@ -52,6 +52,35 @@ def _svg(*parts: str) -> str:
 
 
 ACTION_SVGS: Dict[str, str] = {
+    "nav_home": _svg(
+        '<path fill="{ink}" d="M4 11.2 12 4l8 7.2V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-8.8Z"/>',
+    ),
+    "nav_markup": _svg(
+        '<path fill="{accent}" d="M4 15.5 14.2 5.3a1.5 1.5 0 0 1 2.1 0l2.4 2.4a1.5 1.5 0 0 1 0 2.1L8.5 20H4v-4.5Z"/>',
+        '<path fill="{ink}" d="m15.2 6.4 2.4 2.4" stroke="{ink}" stroke-width="0"/>',
+    ),
+    "nav_edit": _svg(
+        '<path fill="none" stroke="{ink}" stroke-width="2" stroke-linecap="round" d="M5 7h14M5 12h9M5 17h6"/>',
+    ),
+    "nav_organize": _svg(
+        '<rect fill="{ink}" x="3" y="4" width="7" height="9" rx="1.2"/>',
+        '<rect fill="{accent}" x="14" y="4" width="7" height="6" rx="1.2"/>',
+        '<rect fill="{ink}" x="14" y="13" width="7" height="7" rx="1.2"/>',
+        '<rect fill="{accent}" x="3" y="15" width="7" height="5" rx="1.2"/>',
+    ),
+    "nav_review": _svg(
+        '<circle fill="none" stroke="{ink}" stroke-width="2" cx="11" cy="11" r="6"/>',
+        '<path fill="none" stroke="{accent}" stroke-width="2" stroke-linecap="round" d="m16 16 4 4"/>',
+    ),
+    "nav_sign": _svg(
+        '<path fill="none" stroke="{ink}" stroke-width="1.8" stroke-linecap="round" '
+        'd="M4 16c3-6 4 2 7-2s3-6 9-1"/>',
+        '<path fill="none" stroke="{accent}" stroke-width="1.8" stroke-linecap="round" d="M4 19h16"/>',
+    ),
+    "nav_view": _svg(
+        '<path fill="none" stroke="{ink}" stroke-width="2" d="M2.5 12S6 6.5 12 6.5 21.5 12 21.5 12 18 17.5 12 17.5 2.5 12 2.5 12Z"/>',
+        '<circle fill="{accent}" cx="12" cy="12" r="2.2"/>',
+    ),
     "open": _svg(
         '<path fill="{ink}" d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l1.5 1.5H19.5A1.5 1.5 0 0 1 21 8v1H4.5A1.5 1.5 0 0 0 3 10.5V6.5Z"/>',
         '<path fill="{accent}" d="M3 10h18l-1.2 8.1A2 2 0 0 1 17.82 20H6.18A2 2 0 0 1 4.2 18.1L3 10Z"/>',
@@ -227,6 +256,11 @@ TOOL_SVGS: Dict[ToolMode, str] = {
         '<path fill="{ink}" d="M6.5 14.5 13 4.5l4.5 3-6.5 10H6.5Z"/>',
         '<path fill="{accent}" d="M6.5 14.5h8.5l1 2.5H5.5Z"/>',
         '<path fill="none" stroke="{ink}" stroke-width="1.8" stroke-linecap="round" d="M4 20h12"/>',
+    ),
+    ToolMode.SIGN: _svg(
+        '<path fill="none" stroke="{ink}" stroke-width="2" stroke-linecap="round" '
+        'd="M3 15c3.5-7 4.5 2 8-2.5S15 6 21 11"/>',
+        '<path fill="none" stroke="{accent}" stroke-width="1.8" stroke-linecap="round" d="M4 19h16"/>',
     ),
     ToolMode.DELETE_ANNOT: _svg(
         '<rect fill="{accent}" x="3" y="10" width="11" height="4" rx="1"/>',

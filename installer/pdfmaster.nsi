@@ -2,7 +2,7 @@
 ; Requires NSIS 3.0 or later
 
 !define APP_NAME "PDFMaster"
-!define APP_VERSION "0.9.0"
+!define APP_VERSION "0.10.0"
 !define APP_PUBLISHER "PDFMaster Contributors"
 !define APP_URL "https://github.com/Remo-Consultants/pdfmaster"
 !define APP_EXE "PDFMaster.exe"
@@ -23,8 +23,11 @@ RequestExecutionLevel admin
 !define MUI_UNICON "..\resources\icons\pdfmaster.ico"
 
 ; Pages
+; One license page. NSIS allows a single MUI license page, so the file
+; names MIT, AGPL-3.0, and Apache-2.0 and then includes each full text.
+!define MUI_LICENSEPAGE_TEXT_TOP "By installing, you agree to the Terms of Use and the Privacy notice. PDFMaster's own code is MIT. PyMuPDF and Ghostscript 10.08.0 are AGPL-3.0. Qt is LGPL-3.0. Tesseract 5.4.0 is Apache-2.0."
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "..\LICENSE"
+!insertmacro MUI_PAGE_LICENSE "..\installer\BUNDLE_LICENSE.txt"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH

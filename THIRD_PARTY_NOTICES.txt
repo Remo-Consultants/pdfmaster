@@ -1,0 +1,179 @@
+Third-party notices for the PDFMaster Windows build
+
+PDFMaster's own code is under the MIT License (see LICENSE).
+The programs below are separate. Their licenses are not MIT.
+
+Ghostscript 10.08.0
+  License: GNU AGPL-3.0
+  What it does: PDFMaster runs gswin64c.exe to write a PDF/A-2 file.
+  PDFMaster does not load gsdll64.dll and does not modify Ghostscript.
+  License text: vendor/ghostscript/doc/COPYING
+  Source offer next to the binary: vendor/ghostscript/bin/SOURCE.txt
+  Corresponding source for this exact version:
+    https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10080/ghostpdl-10.08.0.tar.gz
+
+Tesseract OCR 5.4.0.20240606
+  License: Apache-2.0
+  What it does: PDFMaster runs tesseract.exe for OCR, orientation, and deskew.
+  Windows build: https://github.com/UB-Mannheim/tesseract/releases/tag/v5.4.0.20240606
+  License text and copyright: vendor/tesseract/doc/LICENSE and vendor/tesseract/doc/AUTHORS
+  This build was not modified.
+
+Tesseract language data
+  License: Apache-2.0
+  Source: https://github.com/tesseract-ocr/tessdata
+  Pinned revision: ced78752cc61322fb554c280d13360b35b8684e4
+  Files: osd, eng, deu, fra, spa, ita, por, chi_sim, jpn, and pdf.ttf
+
+Libraries in the Tesseract Windows build
+  These are unmodified files from the UB-Mannheim installer above.
+  Versions are those reported by tesseract.exe 5.4.0.20240606.
+
+  Leptonica 1.84.1 (libleptonica-6.dll) — BSD-2-Clause
+    Copyright (C) 2001 Leptonica. All rights reserved.
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in
+       the documentation and/or other materials provided with the
+       distribution.
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+    A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ANY
+    CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+    EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+    PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+    PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+    OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+  OpenSSL 3 (libcrypto-3-x64.dll) — Apache-2.0
+    Copyright The OpenSSL Project. The Apache-2.0 text in
+    vendor/tesseract/doc/LICENSE covers these terms.
+
+  Image and compression libraries linked by this Tesseract build:
+    giflib 5.2.1 — MIT
+    libjpeg-turbo 3.0.1 — IJG License, BSD-3-Clause, and zlib components
+    libpng 1.6.43 — PNG Reference Library License version 2
+    libtiff 4.6.0 — libtiff License
+    zlib 1.3 — zlib License. Copyright (C) 1995-2023 Jean-loup Gailly and Mark Adler.
+    libwebp 1.4.0 — BSD-3-Clause
+    OpenJPEG 2.5.2 — BSD-2-Clause
+    libarchive 3.7.4 — BSD-2-Clause
+    liblzma 5.6.1 — BSD Zero Clause License
+    bzip2 1.0.8 — bzip2 License
+    LZ4 1.9.4 — BSD-2-Clause
+    Zstandard 1.5.6 — BSD-3-Clause
+
+  Other libraries installed beside tesseract.exe:
+    FreeType (libfreetype-6.dll) — FreeType Project License (FTL)
+    HarfBuzz (libharfbuzz-0.dll) — MIT
+    ICU (libicu*.dll) — Unicode License
+    libgcc_s_seh-1.dll, libstdc++-6.dll, libwinpthread-1.dll —
+      GPL-3.0 with the GCC Runtime Library Exception, which allows
+      combining those runtime libraries with this program.
+
+  LGPL libraries, shipped as separate DLLs next to tesseract.exe:
+    GLib (libglib-2.0-0.dll, libgobject-2.0-0.dll, libgio-2.0-0.dll,
+      libgmodule-2.0-0.dll) — LGPL-2.1-or-later
+    Cairo (libcairo-2.dll) — LGPL-2.1-only or MPL-1.1.
+      This distribution follows the LGPL-2.1 terms.
+    Pango (libpango-1.0-0.dll, libpangocairo-1.0-0.dll,
+      libpangoft2-1.0-0.dll, libpangowin32-1.0-0.dll) — LGPL-2.1-or-later
+
+  You may replace those GLib, Cairo, and Pango DLLs with compatible
+  modified versions. PDFMaster does not link them into PDFMaster.exe.
+  tesseract.exe, a separate program, loads them.
+  PDFMaster did not modify GLib, Cairo, or Pango. Their source is the
+  source of the versions in the UB-Mannheim build:
+    https://github.com/UB-Mannheim/tesseract/releases/tag/v5.4.0.20240606
+  The LGPL-2.1 text is installed at licenses/LGPL-2.1.txt.
+
+pytesseract, the Python wrapper that starts tesseract.exe, is Apache-2.0.
+
+Python libraries linked into the Windows build
+
+Versions below are read from the environment that generated this notice.
+Regenerate it with write_distribution_notices() after changing requirements.txt.
+Every runtime package in requirements.txt has an entry. Test-only packages do not.
+
+PyMuPDF 1.28.2
+  Distribution name: pymupdf
+  License: GNU AGPL-3.0, or an Artifex commercial license.
+  PDFMaster imports this library for open, save, edit, and redaction.
+  The AGPL-3.0 text is the GNU AGPL text included with this build
+  (vendor/ghostscript/doc/COPYING and the installer license page).
+  Corresponding source for this version: https://github.com/pymupdf/PyMuPDF/releases/tag/1.28.2
+  Corresponding source for PDFMaster: https://github.com/Remo-Consultants/pdfmaster
+  Keep producer identification that this library writes into a PDF.
+  A commercial license from Artifex is the alternative to the AGPL duties.
+
+PySide6 6.11.2 and shiboken6 6.11.2
+  License chosen for this build: LGPL-3.0.
+  Copyright The Qt Company Ltd. and the Qt contributors, and the shiboken authors.
+  The full LGPL-3.0 text is installed at licenses/LGPL-3.0.txt.
+  The Qt and shiboken libraries are separate DLLs in this build.
+  You may replace those DLLs under the LGPL-3.0.
+
+pypdf 6.18.1
+  License: BSD-3-Clause.
+  Copyright (c) 2006-2008, Mathieu Fenniak.
+  Some contributions copyright (c) 2007, Ashish Kulkarni.
+  Some contributions copyright (c) 2014, Steve Witham.
+  The license conditions and disclaimer are installed at
+  licenses/upstream/pypdf-LICENSE.txt.
+
+Pillow 12.3.0
+  License: MIT-CMU.
+  The Python Imaging Library (PIL):
+    Copyright (c) 1997-2011 by Secret Labs AB
+    Copyright (c) 1995-2011 by Fredrik Lundh and contributors
+  Pillow is the friendly PIL fork:
+    Copyright (c) 2010 by Jeffrey 'Alex' Clark and contributors
+  Permission to use, copy, modify, and distribute this software and its
+  documentation for any purpose and without fee is granted, provided that
+  the above copyright notice appears in all copies, and that both that
+  copyright notice and this permission notice appear in supporting
+  documentation, and that the name of Secret Labs AB or the author not be
+  used in advertising or publicity pertaining to distribution of the
+  software without specific, written prior permission.
+  SECRET LABS AB AND THE AUTHOR DISCLAIM ALL WARRANTIES WITH REGARD TO
+  THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+  FITNESS. IN NO EVENT SHALL SECRET LABS AB OR THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
+  RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
+  CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+  CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  Notices for image codecs bundled with Pillow are installed at
+  licenses/upstream/pillow-LICENSE.txt.
+
+cryptography 50.0.1
+  License: Apache-2.0 or BSD-3-Clause.
+  This Windows build includes OpenSSL inside the cryptography package.
+  Copyright The OpenSSL Project.
+  The license texts are installed at
+  licenses/upstream/cryptography-LICENSE.txt,
+  licenses/upstream/cryptography-LICENSE.APACHE, and
+  licenses/upstream/cryptography-LICENSE.BSD.
+
+pytesseract 0.3.13
+  License: Apache-2.0.
+  This is the Python wrapper that starts tesseract.exe. It is not Tesseract.
+
+PyInstaller 6.22.2
+  The bootloader embedded in PDFMaster.exe is GPL-2.0 or later with this
+  exception from the PyInstaller Development Team, Copyright (c) 2010-2023,
+  and earlier authors:
+  In addition to the permissions in the GNU General Public License, the
+  authors give you unlimited permission to link or embed compiled bootloader
+  and related files into combinations with other programs, and to distribute
+  those combinations without any restriction coming from the use of those
+  files. The General Public License restrictions do apply in other respects;
+  for example, they cover modification of the files, and distribution when
+  not linked into a combined executable.
+  The text is installed at licenses/upstream/PyInstaller-COPYING.txt.

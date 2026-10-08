@@ -145,10 +145,8 @@ class OCRDialog(QDialog):
         available = service.available_backends()
         if not available:
             warning = QLabel(
-                "No OCR engine is available.\n"
-                "Install Tesseract (and pytesseract) or easyocr.\n"
-                "Straighten, rotate, and the searchable text layer use that engine.\n"
-                "A PDF/A copy also needs Ghostscript (gswin64c)."
+                "The built-in OCR engine is missing from this copy of PDFMaster.\n"
+                "From a source checkout, run scripts/fetch_bundled_tools.py."
             )
             warning.setWordWrap(True)
             warning.setStyleSheet("color: #c0392b; padding: 20px;")
@@ -192,9 +190,12 @@ class OCRDialog(QDialog):
         self._skip_text.setChecked(True)
         self._deskew = QCheckBox("Straighten crooked scans (replaces those pages with an image)")
         self._rotate = QCheckBox("Turn sideways pages upright")
-        self._pdfa = QCheckBox("Also save a PDF/A-2 copy (uses Ghostscript)")
+        self._pdfa = QCheckBox("Also save a PDF/A-2 copy")
         if ghostscript_executable() is None:
-            self._pdfa.setToolTip("Install Ghostscript and put gswin64c on PATH to enable this.")
+            self._pdfa.setToolTip(
+                "The bundled Ghostscript files are missing. "
+                "From a source checkout, run scripts/fetch_bundled_tools.py."
+            )
         job_layout.addWidget(self._write_layer)
         job_layout.addWidget(self._skip_text)
         job_layout.addWidget(self._deskew)
@@ -287,7 +288,7 @@ class OCRDialog(QDialog):
                 QMessageBox.warning(
                     self,
                     "PDF/A",
-                    "PDF/A export needs Ghostscript. Install it and make sure gswin64c is on PATH.",
+                    "PDF/A export needs the Ghostscript files shipped with PDFMaster.",
                 )
                 return
             chosen, _ = QFileDialog.getSaveFileName(

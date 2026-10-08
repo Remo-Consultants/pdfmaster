@@ -185,6 +185,9 @@ def main() -> int:
     if args.clean:
         clean_build()
 
+    from src.licensing import write_distribution_notices
+
+    write_distribution_notices(ROOT)
     print(f"Building {APP_NAME} v{VERSION}...")
 
     if not build_pyinstaller(args.onefile):

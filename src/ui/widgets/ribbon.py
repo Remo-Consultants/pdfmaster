@@ -22,8 +22,7 @@ from PySide6.QtWidgets import (
 
 from src.ui.theme import color as theme_color
 
-RIBBON_HEIGHT = 78
-RIBBON_COMPACT_HEIGHT = 68
+RIBBON_HEIGHT = 84
 
 
 class RibbonGroup(QFrame):
@@ -43,7 +42,7 @@ class RibbonGroup(QFrame):
         layout.setSpacing(1)
 
         self._content = QWidget()
-        self._content.setMinimumHeight(44)
+        self._content.setMinimumHeight(54)
         self._content_layout = QHBoxLayout(self._content)
         self._content_layout.setContentsMargins(0, 0, 0, 0)
         self._content_layout.setSpacing(2)
@@ -84,15 +83,15 @@ class RibbonGroup(QFrame):
             btn.setIconSize(QSize(22, 22))
             if caption:
                 btn.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
-                width = max(56, min(76, 10 + len(caption) * 7))
-                btn.setFixedSize(width, 48)
+                width = max(64, min(88, 12 + len(caption) * 7))
+                btn.setFixedSize(width, 52)
             else:
                 btn.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
-                btn.setFixedSize(36, 48)
+                btn.setFixedSize(40, 40)
         else:
             btn.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
-            btn.setIconSize(QSize(18, 18))
-            btn.setFixedSize(30, 30)
+            btn.setIconSize(QSize(20, 20))
+            btn.setFixedSize(36, 36)
 
         self._apply_button_palette(btn)
         self._content_layout.addWidget(btn)
@@ -134,7 +133,7 @@ class RibbonGroup(QFrame):
         self._scheme = scheme
         muted = theme_color("disabled_text", scheme)
         self._label.setStyleSheet(
-            f"font-size: 9px; color: {muted}; background: transparent;"
+            f"font-size: 10px; letter-spacing: 0.04em; color: {muted}; background: transparent;"
         )
         for btn in self._buttons:
             self._apply_button_palette(btn)
@@ -238,13 +237,15 @@ class Ribbon(QWidget):
         return self._current_mode
 
     def set_compact(self, compact: bool) -> None:
-        """Home-only essentials when no document is open."""
-        if compact == self._compact:
-            return
+        """Hide the tool rail on the home screen; show it once a PDF is open."""
         self._compact = compact
-        self.setFixedHeight(RIBBON_COMPACT_HEIGHT if compact else RIBBON_HEIGHT)
         if compact:
             self.set_mode("home")
+            self.setFixedHeight(0)
+            self.hide()
+            return
+        self.setFixedHeight(RIBBON_HEIGHT)
+        self.show()
 
     @property
     def is_compact(self) -> bool:

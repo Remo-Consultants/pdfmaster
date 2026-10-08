@@ -22,6 +22,7 @@ class ToolMode(str, Enum):
     REDACT = "redact"
     ERASE = "erase"
     DELETE_ANNOT = "delete_annot"
+    SIGN = "sign"
 
 
 TOOL_LABELS: Dict[ToolMode, str] = {
@@ -38,6 +39,7 @@ TOOL_LABELS: Dict[ToolMode, str] = {
     ToolMode.REDACT: "Redact",
     ToolMode.ERASE: "Erase",
     ToolMode.DELETE_ANNOT: "Delete Markup",
+    ToolMode.SIGN: "Place signature",
 }
 
 TOOL_HINTS: Dict[ToolMode, str] = {
@@ -54,6 +56,7 @@ TOOL_HINTS: Dict[ToolMode, str] = {
     ToolMode.REDACT: "Drag over content to remove it permanently.",
     ToolMode.ERASE: "Drag over content to white it out.",
     ToolMode.DELETE_ANNOT: "Click a highlight or note to delete it.",
+    ToolMode.SIGN: "Drag a box to place your saved signature.",
 }
 
 # Tools that need a dragged rectangle.
@@ -67,6 +70,7 @@ DRAG_TOOLS: Set[ToolMode] = {
     ToolMode.EDIT_TEXT,
     ToolMode.REDACT,
     ToolMode.ERASE,
+    ToolMode.SIGN,
 }
 
 # Tools that act on a single click.
@@ -80,6 +84,7 @@ FILLED_PREVIEW: Set[ToolMode] = {
     ToolMode.HIGHLIGHT,
     ToolMode.REDACT,
     ToolMode.ERASE,
+    ToolMode.SIGN,
 }
 
 

@@ -5,10 +5,22 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from PySide6.QtCore import QPoint, QPointF, Qt
+from PySide6.QtGui import QWheelEvent
 
 from tests.conftest import act_and_wait, open_and_wait
 
 pytest.importorskip("pytestqt")
+
+
+def _logical_pixmap_width(pixmap) -> float:
+    ratio = pixmap.devicePixelRatio() or 1.0
+    return pixmap.width() / ratio
+
+
+def _logical_pixmap_height(pixmap) -> float:
+    ratio = pixmap.devicePixelRatio() or 1.0
+    return pixmap.height() / ratio
 
 
 def test_window_starts_empty(main_window) -> None:
@@ -80,6 +92,48 @@ def test_zoom_controls_and_limits(qtbot, main_window, make_pdf) -> None:
     assert main_window.viewer.zoom_level == pytest.approx(0.25)
 
 
+def test_ctrl_wheel_zooms_toward_the_pointer(qtbot, main_window, make_pdf) -> None:
+    pdf = make_pdf(pages=3)
+    open_and_wait(qtbot, main_window, pdf)
+    viewer = main_window.viewer
+    rect = viewer._layout[0]
+    canvas_point = rect.center()
+    viewport_point = QPointF(
+        canvas_point.x() - viewer.horizontalScrollBar().value(),
+        canvas_point.y() - viewer.verticalScrollBar().value(),
+    )
+    before = viewer._capture_anchor(viewport_point)
+    event = QWheelEvent(
+        canvas_point,
+        QPointF(canvas_point),
+        QPoint(0, 0),
+        QPoint(0, 120),
+        Qt.MouseButton.NoButton,
+        Qt.KeyboardModifier.ControlModifier,
+        Qt.ScrollPhase.NoScrollPhase,
+        False,
+    )
+    assert viewer.handle_wheel(canvas_point, event)
+    assert viewer.zoom_level == pytest.approx(1.05)
+    after = viewer._capture_anchor(viewport_point)
+    assert after[0] == before[0]
+    assert after[1] == pytest.approx(before[1], abs=0.02)
+    assert after[2] == pytest.approx(before[2], abs=0.02)
+
+    plain = QWheelEvent(
+        canvas_point,
+        QPointF(canvas_point),
+        QPoint(0, 0),
+        QPoint(0, 120),
+        Qt.MouseButton.NoButton,
+        Qt.KeyboardModifier.NoModifier,
+        Qt.ScrollPhase.NoScrollPhase,
+        False,
+    )
+    assert viewer.handle_wheel(canvas_point, plain) is False
+    assert viewer.zoom_level == pytest.approx(1.05)
+
+
 def test_slider_drives_zoom(qtbot, main_window, make_pdf) -> None:
     pdf = make_pdf(pages=1)
     open_and_wait(qtbot, main_window, pdf)
@@ -94,7 +148,7 @@ def test_fit_to_width_fills_viewport(qtbot, main_window, make_pdf) -> None:
     open_and_wait(qtbot, main_window, pdf)
     act_and_wait(qtbot, main_window.viewer, main_window.fit_to_width)
 
-    rendered = main_window.viewer.page_pixmap(0).width()
+    rendered = _logical_pixmap_width(main_window.viewer.page_pixmap(0))
     viewport = main_window.viewer.viewport().width()
     assert rendered <= viewport
     assert rendered >= viewport - 40  # actually fills, not just fits
@@ -107,7 +161,7 @@ def test_fit_to_width_after_rotation(qtbot, main_window, make_pdf) -> None:
     act_and_wait(qtbot, main_window.viewer, main_window.rotate_clockwise)
     act_and_wait(qtbot, main_window.viewer, main_window.fit_to_width)
 
-    rendered = main_window.viewer.page_pixmap(0).width()
+    rendered = _logical_pixmap_width(main_window.viewer.page_pixmap(0))
     viewport = main_window.viewer.viewport().width()
     assert rendered <= viewport, f"rotated page overflows by {rendered - viewport}px"
     assert rendered >= viewport - 40
@@ -121,10 +175,12 @@ def test_fit_to_page_after_rotation(qtbot, main_window, make_pdf) -> None:
 
     pixmap = main_window.viewer.page_pixmap(0)
     viewport = main_window.viewer.viewport().size()
-    assert pixmap.width() <= viewport.width()
-    assert pixmap.height() <= viewport.height()
+    width = _logical_pixmap_width(pixmap)
+    height = _logical_pixmap_height(pixmap)
+    assert width <= viewport.width()
+    assert height <= viewport.height()
     # A landscape page in a landscape viewport should be width-limited.
-    assert pixmap.width() >= viewport.width() - 40
+    assert width >= viewport.width() - 40
 
 
 def test_rotation_cycles_and_marks_modified(qtbot, main_window, make_pdf) -> None:

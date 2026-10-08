@@ -6,7 +6,7 @@ from pathlib import Path
 # Application identity
 # ---------------------------------------------------------------------------
 APP_NAME = "PDFMaster"
-APP_VERSION = "0.9.0"
+APP_VERSION = "0.10.0"
 APP_AUTHOR = "PDFMaster Contributors"
 APP_DESCRIPTION = "A professional PDF viewer and editor for Windows"
 APP_LICENSE = "MIT"
@@ -217,7 +217,7 @@ MSG_REDONE = "Redo applied"
 MSG_SEARCH_NO_RESULTS = "No results found for '{query}'"
 MSG_SEARCH_FOUND = "Found {count} result(s) for '{query}'"
 MSG_OCR_COMPLETE = "OCR complete: {chars} characters extracted"
-MSG_OCR_NOT_AVAILABLE = "OCR is not available. Install tesseract-ocr or easyocr."
+MSG_OCR_NOT_AVAILABLE = "OCR is not available. The built-in Tesseract engine is missing."
 MSG_TEXT_EXTRACTED = "Extracted {chars} characters from {pages} page(s)"
 MSG_PASSWORD_SET = "Password protection applied"
 MSG_PASSWORD_REMOVED = "Password protection removed"

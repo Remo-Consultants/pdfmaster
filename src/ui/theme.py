@@ -1,8 +1,7 @@
-"""Quiet paper-studio theming that follows the Windows colour scheme.
+"""Light studio theme inspired by a quiet document workspace.
 
-Brand accent matches the product site (teal). Qt 6.5+ reports the OS
-preference through ``QStyleHints.colorScheme()`` so PDFMaster can follow
-along without a restart.
+Soft lavender canvas, white panels, and an indigo accent. The app uses
+this light theme so the shell stays consistent.
 """
 
 from __future__ import annotations
@@ -19,84 +18,84 @@ logger = get_logger(__name__)
 LIGHT = "light"
 DARK = "dark"
 
-# Corner radius used across QSS (stored as a digit string for the token table).
+# Soft corners, matching the studio cards.
 RADIUS_PX = 12
 
 # Every colour the UI needs, per scheme. Keeping them in one table makes
 # it obvious when a scheme is missing a value.
 COLORS: Dict[str, Dict[str, str]] = {
     LIGHT: {
-        "window": "#f1f4f7",
-        "window_text": "#0f172a",
+        "window": "#f4f2fb",
+        "window_text": "#1c1b2e",
         "base": "#ffffff",
-        "alternate_base": "#f1f5f9",
-        "text": "#0f172a",
+        "alternate_base": "#f4f2fb",
+        "text": "#1c1b2e",
         "button": "#ffffff",
-        "button_text": "#0f172a",
+        "button_text": "#1c1b2e",
         "bright_text": "#ffffff",
-        "highlight": "#0f766e",
+        "highlight": "#4f46e5",
         "highlight_text": "#ffffff",
-        "disabled_text": "#94a3b8",
-        "border": "#e2e8f0",
-        "canvas": "#e6ebf0",
-        "page_border": "#cbd5e1",
-        "shadow": "#64748b",
-        "icon": "#1e293b",
-        "icon_disabled": "#94a3b8",
-        "accent": "#0f766e",
-        "accent_soft": "#ccfbf1",
-        "panel": "#f8fafc",
-        "hover": "#eef2f6",
-        "checked": "#ccfbf1",
+        "disabled_text": "#a8a4bb",
+        "border": "#e7e4f2",
+        "canvas": "#f4f2fb",
+        "page_border": "#e7e4f2",
+        "shadow": "#c4bdd6",
+        "icon": "#312e81",
+        "icon_disabled": "#a8a4bb",
+        "accent": "#4f46e5",
+        "accent_soft": "#ece9fe",
+        "panel": "#f7f6fc",
+        "hover": "#f3f1fb",
+        "checked": "#ece9fe",
         "paper": "#ffffff",
         "surface": "#ffffff",
-        "muted": "#64748b",
+        "muted": "#8b879c",
         "danger": "#dc2626",
         "success": "#059669",
-        "sidebar": "#eef1f5",
-        "sidebar_text": "#334155",
-        "sidebar_active": "#ffffff",
-        "sidebar_hover": "#e4e9ef",
+        "sidebar": "#ffffff",
+        "sidebar_text": "#4b5168",
+        "sidebar_active": "#ece9fe",
+        "sidebar_hover": "#f3f1fb",
         "topbar": "#ffffff",
-        "cta": "#0f172a",
+        "cta": "#4f46e5",
         "cta_text": "#ffffff",
         "radius": str(RADIUS_PX),
     },
     DARK: {
-        "window": "#0f1419",
-        "window_text": "#e8eef2",
-        "base": "#1a222c",
-        "alternate_base": "#222b36",
-        "text": "#e8eef2",
-        "button": "#1e2732",
-        "button_text": "#e8eef2",
-        "bright_text": "#ffffff",
-        "highlight": "#14b8a6",
-        "highlight_text": "#042f2e",
-        "disabled_text": "#64748b",
-        "border": "#2d3744",
-        "canvas": "#121820",
-        "page_border": "#0a0e12",
+        "window": "#07090c",
+        "window_text": "#e7eef4",
+        "base": "#0e1217",
+        "alternate_base": "#12171d",
+        "text": "#e7eef4",
+        "button": "#12171d",
+        "button_text": "#e7eef4",
+        "bright_text": "#041016",
+        "highlight": "#a78bfa",
+        "highlight_text": "#1e1b4b",
+        "disabled_text": "#5c6b7a",
+        "border": "#1c242e",
+        "canvas": "#0a0d11",
+        "page_border": "#05070a",
         "shadow": "#000000",
-        "icon": "#e2e8f0",
-        "icon_disabled": "#64748b",
-        "accent": "#14b8a6",
-        "accent_soft": "#134e4a",
-        "panel": "#161d26",
-        "hover": "#243040",
-        "checked": "#134e4a",
-        "paper": "#1a222c",
-        "surface": "#161d26",
-        "muted": "#94a3b8",
+        "icon": "#d5dee6",
+        "icon_disabled": "#5c6b7a",
+        "accent": "#a78bfa",
+        "accent_soft": "#2e1065",
+        "panel": "#10151b",
+        "hover": "#171e26",
+        "checked": "#2e1065",
+        "paper": "#0e1217",
+        "surface": "#0e1217",
+        "muted": "#8b9aab",
         "danger": "#f87171",
         "success": "#34d399",
-        "sidebar": "#0c1016",
-        "sidebar_text": "#cbd5e1",
-        "sidebar_active": "#1a222c",
-        "sidebar_hover": "#161d26",
-        "topbar": "#141a22",
-        "cta": "#e8eef2",
-        "cta_text": "#0f1419",
+        "sidebar": "#07090c",
+        "sidebar_text": "#b7c3cf",
+        "sidebar_active": "#10151b",
+        "sidebar_hover": "#10151b",
+        "topbar": "#07090c",
+        "cta": "#7c3aed",
+        "cta_text": "#ffffff",
         "radius": str(RADIUS_PX),
     },
 }
@@ -193,6 +192,36 @@ def build_stylesheet(scheme: str) -> str:
         border-color: {c['accent']};
     }}
     QToolButton:disabled {{ color: {c['disabled_text']}; }}
+    QAbstractButton {{
+        color: {c['button_text']};
+    }}
+    QPushButton,
+    QDialogButtonBox QPushButton,
+    QMessageBox QPushButton {{
+        background: {c['button']};
+        color: {c['button_text']};
+        border: 1px solid {c['border']};
+        border-radius: 10px;
+        padding: 8px 16px;
+        min-height: 18px;
+    }}
+    QPushButton:hover,
+    QDialogButtonBox QPushButton:hover,
+    QMessageBox QPushButton:hover {{
+        background: {c['hover']};
+        color: {c['button_text']};
+    }}
+    QPushButton:pressed,
+    QDialogButtonBox QPushButton:pressed,
+    QMessageBox QPushButton:pressed {{
+        background: {c['checked']};
+        color: {c['button_text']};
+    }}
+    QPushButton:disabled,
+    QDialogButtonBox QPushButton:disabled,
+    QMessageBox QPushButton:disabled {{
+        color: {c['disabled_text']};
+    }}
     QStatusBar {{
         background: {c['window']};
         border-top: 1px solid {c['border']};
@@ -205,11 +234,11 @@ def build_stylesheet(scheme: str) -> str:
         color: {c['window_text']};
         titlebar-close-icon: none;
         titlebar-normal-icon: none;
-        font-weight: 600;
+        font-weight: 500;
     }}
     QDockWidget::title {{
-        background: {c['panel']};
-        padding: 10px 12px;
+        background: {c['sidebar']};
+        padding: 8px 12px;
         border-bottom: 1px solid {c['border']};
         text-align: left;
     }}
@@ -270,6 +299,7 @@ def build_stylesheet(scheme: str) -> str:
         border-bottom: 1px solid {c['border']};
     }}
     QMenuBar::item {{
+        color: {c['window_text']};
         padding: 4px 10px;
         border-radius: 8px;
     }}
@@ -282,6 +312,7 @@ def build_stylesheet(scheme: str) -> str:
         padding: 4px;
     }}
     QMenu::item {{
+        color: {c['text']};
         padding: 6px 28px 6px 12px;
         border-radius: 8px;
     }}
@@ -311,10 +342,12 @@ def build_stylesheet(scheme: str) -> str:
         color: {c['text']};
     }}
     QTabWidget#documentTabs QTabBar::tab:selected {{
-        color: {c['text']};
-        background: {c['surface']};
+        color: {c['accent']};
+        background: transparent;
         font-weight: 600;
-        border: 1px solid {c['border']};
+        border: none;
+        border-bottom: 2px solid {c['accent']};
+        border-radius: 0;
     }}
     QWidget#appSidebar {{
         background: {c['sidebar']};
@@ -322,22 +355,23 @@ def build_stylesheet(scheme: str) -> str:
     }}
     QLabel#sidebarBrand {{
         color: {c['window_text']};
-        font-weight: 700;
-        font-size: 15px;
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: 0.04em;
         background: transparent;
     }}
     QLabel#sidebarSection {{
         color: {c['muted']};
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.06em;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
         background: transparent;
-        padding: 12px 12px 6px 12px;
+        padding: 18px 10px 4px 10px;
     }}
     QToolButton#sidebarNav {{
         background: transparent;
         color: {c['sidebar_text']};
-        border: 1px solid transparent;
+        border: none;
         border-radius: 10px;
         padding: 8px 12px;
         text-align: left;
@@ -349,8 +383,7 @@ def build_stylesheet(scheme: str) -> str:
     }}
     QToolButton#sidebarNav:checked {{
         background: {c['sidebar_active']};
-        color: {c['window_text']};
-        border-color: {c['border']};
+        color: {c['accent']};
         font-weight: 600;
     }}
     QWidget#appTopBar {{
@@ -364,71 +397,44 @@ def build_stylesheet(scheme: str) -> str:
         padding: 8px 14px;
         min-height: 18px;
     }}
-    QPushButton#primaryCta {{
-        background: {c['cta']};
-        color: {c['cta_text']};
-        border: none;
-        border-radius: 12px;
-        padding: 10px 18px;
-        font-weight: 600;
+    QLineEdit#topSearch:focus {{
+        border: 1px solid {c['accent']};
     }}
-    QPushButton#primaryCta:hover {{
-        background: {c['accent']};
-        color: {c['bright_text']};
-    }}
-    QPushButton#sidebarOpen {{
-        background: {c['cta']};
-        color: {c['cta_text']};
-        border: none;
-        border-radius: 12px;
-        padding: 10px 14px;
-        font-weight: 600;
-    }}
-    QPushButton#sidebarOpen:hover {{
-        background: {c['accent']};
-        color: {c['bright_text']};
-    }}
-    QPushButton#sidebarGhost {{
-        background: transparent;
-        color: {c['sidebar_text']};
-        border: 1px solid {c['border']};
-        border-radius: 12px;
-        padding: 8px 14px;
-        font-weight: 500;
-    }}
-    QPushButton#sidebarGhost:hover {{
-        background: {c['sidebar_hover']};
+    QLabel#topDocTitle {{
         color: {c['window_text']};
-    }}
-    QPushButton#welcomePrimary {{
-        background: {c['cta']};
-        color: {c['cta_text']};
-        border: none;
-        border-radius: 12px;
-        padding: 12px 22px;
         font-weight: 600;
         font-size: 13px;
-    }}
-    QPushButton#welcomePrimary:hover {{
-        background: {c['accent']};
-        color: {c['bright_text']};
-    }}
-    QPushButton#welcomeGhost {{
         background: transparent;
-        color: {c['text']};
-        border: 1px solid {c['border']};
-        border-radius: 12px;
+        padding-right: 8px;
+    }}
+    QPushButton#primaryCta, QPushButton#sidebarOpen, QPushButton#welcomePrimary {{
+        background: {c['cta']};
+        color: {c['cta_text']};
+        border: none;
+        border-radius: 10px;
         padding: 10px 18px;
+        font-weight: 600;
+    }}
+    QPushButton#primaryCta:hover, QPushButton#sidebarOpen:hover, QPushButton#welcomePrimary:hover {{
+        background: #4338ca;
+        color: {c['cta_text']};
+    }}
+    QPushButton#sidebarGhost, QPushButton#welcomeGhost {{
+        background: transparent;
+        color: {c['sidebar_text']};
+        border: none;
+        border-radius: {r}px;
+        padding: 6px 10px;
         font-weight: 500;
     }}
-    QPushButton#welcomeGhost:hover {{
-        background: {c['hover']};
-        border-color: {c['accent']};
+    QPushButton#sidebarGhost:hover, QPushButton#welcomeGhost:hover {{
+        color: {c['window_text']};
+        background: {c['sidebar_hover']};
     }}
     QFrame#welcomeDropZone {{
         background: {c['surface']};
-        border: 1.5px dashed {c['border']};
-        border-radius: 18px;
+        border: 1px solid {c['border']};
+        border-radius: 16px;
     }}
     QFrame#welcomeDropZone[dragActive="true"] {{
         border-color: {c['accent']};

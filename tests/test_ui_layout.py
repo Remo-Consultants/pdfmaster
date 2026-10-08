@@ -258,17 +258,27 @@ def test_opening_document_leaves_welcome(qtbot, main_window, make_pdf) -> None:
     assert main_window._thumb_dock.isVisible()
 
 
-def test_ribbon_is_slim(main_window) -> None:
-    from src.ui.widgets.ribbon import RIBBON_COMPACT_HEIGHT, RIBBON_HEIGHT
+def test_ribbon_is_hidden_on_home(main_window) -> None:
+    from src.ui.widgets.ribbon import RIBBON_HEIGHT
 
-    assert main_window._ribbon.height() == RIBBON_COMPACT_HEIGHT
+    assert not main_window._ribbon.isVisible()
     main_window._ribbon.set_compact(False)
+    assert main_window._ribbon.isVisible()
     assert main_window._ribbon.height() == RIBBON_HEIGHT
 
 
-def test_brand_accent_is_teal() -> None:
-    assert theme.color("accent", theme.LIGHT).lower() == "#0f766e"
-    assert theme.color("accent", theme.DARK).lower() == "#14b8a6"
+def test_brand_accent_is_indigo() -> None:
+    assert theme.color("accent", theme.LIGHT).lower() == "#4f46e5"
+    assert theme.color("accent", theme.DARK).lower() == "#a78bfa"
+
+
+def test_buttons_use_dark_ink_on_the_light_theme() -> None:
+    sheet = theme.build_stylesheet(theme.LIGHT)
+    ink = theme.color("button_text", theme.LIGHT)
+    assert "QAbstractButton" in sheet
+    assert "QDialogButtonBox QPushButton" in sheet
+    assert "QMessageBox QPushButton" in sheet
+    assert ink in sheet
 
 
 # ----------------------------------------------------------------------

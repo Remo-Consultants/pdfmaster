@@ -242,7 +242,7 @@ Headless GUI tests use `pytest-qt` with a 60s timeout and auto-cancelled dialogs
 | Python (source) | 3.10 | 3.11–3.13 |
 | RAM | 4 GB | 8 GB+ |
 
-OCR is optional: install [Tesseract](https://github.com/tesseract-ocr/tesseract) or `easyocr` for the searchable text layer. A PDF/A-2 copy also needs [Ghostscript](https://ghostscript.com/) (`gswin64c` on PATH).
+OCR and PDF/A use Tesseract and Ghostscript shipped in `vendor/`. End users do not install them. A source checkout fetches them once with `.\venv\Scripts\python scripts\fetch_bundled_tools.py`. EasyOCR remains an optional extra.
 
 ---
 
@@ -261,10 +261,38 @@ OCR is optional: install [Tesseract](https://github.com/tesseract-ocr/tesseract)
 | Organize merge + drag reorder (0.8.2) | Shipped (0.8.2) |
 | Sidebar shell + context tool rail | Shipped (0.9.0) |
 | Searchable OCR, deskew, rotate, PDF/A-2 export | Shipped |
+| Studio theme, bundled OCR, e-sign | Shipped (0.10.0) |
+
+### Next — Arlington checks
+
+Source: the [Arlington PDF Model](https://github.com/pdf-association/arlington-pdf-model) (PDF Association, Apache-2.0). It is a machine-readable definition of PDF dictionaries, arrays, and streams from ISO 32000-2, errata, and documented extensions. It is not an editor, and it does not define content-stream operators, lexical dialects, cross-reference tables, or linearization. PDFMaster will not pretend to cover those.
+
+The gap today: Review → PDF/A reads the XMP label and a few clues. Save, compress, merge, and rotate rewrite the file through PyMuPDF. A label can survive after the objects it describes are gone. There is no structure tree, no `ActualText`, and no check that a save still matches the model.
+
+| Slice | What it adds | Status |
+| --- | --- | --- |
+| 1. Claim vs file | Keep the PDF/A panel as a **claim**. Say plainly that it is not an ISO 19005 or ISO 14289 pass. | Next |
+| 2. Object check on open | Pin a subset of Arlington `tsv/latest` and check the objects this app already touches: trailer, catalog, page tree, annotations, fonts, metadata, OutputIntents. Report missing required keys, wrong types, and values the model disallows. In-process. No veraPDF or PDFix launch. | Next |
+| 3. Rewrite warning | Run the same check after save, compress, merge, and rotate. If the PDF/A or PDF/UA label is still present and the check now fails, warn and offer to strip the false label. | Later |
+| 4. Structure read-out | Read `StructTreeRoot` / `StructElem` when present, including Figure `ActualText` and Placement. Show it. Do not write tags yet. | Later |
+| 5. Tag-safe edits | Teach merge, split, and rotate to keep or drop the structure tree on purpose, and update the label to match. | Later |
+
+Out of this roadmap: cloud sync, content-stream operator validation, a full Arlington predicate engine (`fn:Eval` across every object), 3D or VR views of the model, and authoring PDF/UA tags before the checker exists.
 
 ---
 
 ## Changelog (recent)
+
+### 0.10.0 — 2026-10-08
+
+Studio workspace, OCR engines that ship with the app, and e-sign.
+
+- **Added:** Light studio theme, quieter home screen, and recent files on the right
+- **Added:** Ctrl+scroll zoom that stays on the spot under the pointer
+- **Added:** Sharper page text on high-resolution displays
+- **Added:** Tesseract and Ghostscript resolved from `vendor/` so OCR and PDF/A do not need a separate install
+- **Added:** Sign mode — draw, type a name in several styles, or import an image, then place it
+- **Changed:** Dialog and menu button text stays dark on light buttons
 
 ### Searchable OCR — 2026-10-08
 
@@ -343,7 +371,14 @@ PDFMaster is **independent** and not affiliated with Adobe, Foxit, Microsoft, or
 
 ## License & credits
 
-MIT — see [LICENSE](LICENSE).
+PDFMaster's own code is MIT — see [LICENSE](LICENSE). Terms for the official Windows build: [TERMS_OF_USE.txt](TERMS_OF_USE.txt). What the apps store on the device: [PRIVACY.txt](PRIVACY.txt). Those terms do not narrow the MIT license. In the app: Help → Terms of use, and Help → Privacy.
+
+The Windows build also includes two separate programs. Their licenses stay on those programs:
+
+- Ghostscript 10.08.0 (AGPL-3.0), run only to write a PDF/A file. Corresponding source: [ghostpdl-10.08.0.tar.gz](https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs10080/ghostpdl-10.08.0.tar.gz)
+- Tesseract OCR 5.4.0.20240606 (Apache-2.0) and the libraries installed beside it (including LGPL copies of GLib, Cairo, and Pango)
+
+Details, copyright lines, and the Ghostscript source offer: [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). The installer shows the same notice followed by the full license texts. In the app: Help → Third-party notices.
 
 Built with [PySide6](https://doc.qt.io/qtforpython/), [PyMuPDF](https://pymupdf.readthedocs.io/), [pypdf](https://pypdf.readthedocs.io/), and [Pillow](https://python-pillow.org/).
 

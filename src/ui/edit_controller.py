@@ -149,6 +149,7 @@ class EditController:
                 ToolMode.EDIT_TEXT: self._edit_text,
                 ToolMode.REDACT: self._redact,
                 ToolMode.ERASE: self._erase,
+                ToolMode.SIGN: self._place_signature,
             }[tool]
         except KeyError:
             logger.debug("No area handler for tool %s", tool)
@@ -286,6 +287,21 @@ class EditController:
         self._begin_edit()
         ContentEditor.add_image(self.document, page, rect, path)
         self._finish(f"Added image to page {page + 1}")
+
+    def _place_signature(self, page: int, rect: RectLike, _tool: ToolMode) -> None:
+        from src.services.esign import signature_name, signature_path
+
+        path = signature_path()
+        if path is None:
+            self._warn("Create a signature before placing it.")
+            return
+        self._begin_edit()
+        ContentEditor.add_image(self.document, page, rect, path)
+        who = signature_name()
+        label = f"Signed page {page + 1}"
+        if who:
+            label = f"Signed page {page + 1} as {who}"
+        self._finish(label)
 
     def _edit_text(self, page: int, rect: RectLike, _tool: ToolMode) -> None:
         spans = ContentEditor.find_spans(self.document, page, rect)

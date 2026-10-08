@@ -1,0 +1,73 @@
+Terms of use
+PDFMaster for Windows
+Effective 8 October 2026
+
+These terms are the agreement for the official PDFMaster for Windows application offered by PDFMaster Contributors. The project is published from the Remo Consultants GitHub organization at https://github.com/Remo-Consultants/pdfmaster.
+
+1. Acceptance
+
+Installing the official Windows build, or running that build, is acceptance of these terms. If you do not accept them, do not install the build and do not run it.
+
+2. The software these terms cover
+
+These terms cover the official PDFMaster for Windows application, including the Setup.exe installer and the portable build distributed with it.
+
+PDFMaster's own source code is offered under the MIT License in the file named LICENSE. These terms do not narrow that license. Anyone who receives the source may use, copy, modify, and distribute it under the MIT License, with the copyright and permission notice kept in place.
+
+3. Your documents stay on your computer
+
+PDFMaster is an offline application. It does not create an account, and it does not upload your files to PDFMaster Contributors or to a service operated for this application. A file leaves your computer only when you save it somewhere else, print it, or send it yourself.
+
+You keep whatever rights you already have in your documents. These terms do not give PDFMaster Contributors any right to your files.
+
+What the applications store on the device, including recent paths and the Windows log, is described in PRIVACY.txt. Help, Privacy, opens that notice. The log can contain words you search for or redact. It is not uploaded.
+
+4. Your responsibility for the result
+
+You decide what to do with a file after PDFMaster writes it. In particular:
+
+- Redaction is intended to remove the content you mark. Inspect the saved file before you rely on it.
+- Password protection and permission flags are file-security features. They are not a promise that a file cannot be opened or copied by every possible means.
+- A signature field is an empty form field. PDFMaster does not sign a document and does not make a signature legally effective.
+- PDF/A export runs Ghostscript as a separate program. The PDF/A check reads claims and clues in the file. Neither one is an ISO 19005 certification, a legal opinion, or a guarantee that a recipient or an archive will accept the file.
+- Compare, search, and OCR can miss or misread content. Check the output before you depend on it.
+
+You are responsible for using the software lawfully, for the files you open and save, and for keeping any password you set.
+
+5. Other programs in the Windows build
+
+The official Windows build includes programs that PDFMaster did not write. Their licenses stay on those programs. The MIT License does not replace them.
+
+- PyMuPDF is under the GNU AGPL-3.0, or an Artifex commercial license. PDFMaster imports it to open, save, edit, and redact. The corresponding source for the version in a given build is named in THIRD_PARTY_NOTICES.txt. Keep producer identification that PyMuPDF writes into a PDF.
+- PySide6 and shiboken6 are under the LGPL-3.0 for this build. The Qt and shiboken DLLs are separate files and may be replaced as the LGPL allows.
+- Ghostscript 10.08.0 is under the GNU AGPL-3.0. PDFMaster runs gswin64c.exe as a separate program to write a PDF/A file. It does not load gsdll64.dll. The corresponding source for that exact version is stated in THIRD_PARTY_NOTICES.txt and in vendor/ghostscript/bin/SOURCE.txt.
+- Tesseract OCR 5.4.0.20240606 is under the Apache-2.0, together with the libraries installed beside it, including LGPL-2.1 copies of GLib, Cairo, and Pango. Those libraries are separate DLLs and may be replaced as the LGPL allows.
+- pypdf, Pillow, cryptography (including OpenSSL), pytesseract, and the PyInstaller bootloader are also included. Their notices are in THIRD_PARTY_NOTICES.txt.
+
+Redistributing the Windows build requires you to keep those license terms, notices, and the Ghostscript source offer with the copy you pass on. The details are in THIRD_PARTY_NOTICES.txt. Help, Third-party notices, opens the same text in the application.
+
+6. No warranty
+
+The software is provided "AS IS", without warranty of any kind, express or implied, including any warranty of merchantability, fitness for a particular purpose, or non-infringement. PDFMaster Contributors do not warrant that the software will be uninterrupted, that a saved file will meet a standard, or that a third party will accept a file.
+
+7. Liability
+
+To the extent the law allows, PDFMaster Contributors are not liable for any claim, damages, or other liability, whether in contract, tort, or otherwise, arising from the software or from your use of it. This includes loss of files, loss of a password, a failed redaction, a rejected PDF/A file, or a document that does not have the legal effect you expected.
+
+Nothing in these terms limits liability that the law does not allow to be limited, including liability that cannot be excluded where you live.
+
+8. Names and marks
+
+PDFMaster is an independent project. Adobe, Acrobat, Foxit, Windows, and the names of other products are trademarks of their respective owners. PDFMaster is not endorsed by those owners. You may not use those marks to suggest that PDFMaster is their product.
+
+9. Changes
+
+A later release may ship with updated terms. The effective date at the top of the file in that release is the date of those terms. Installing or running that release is acceptance of the terms shipped with it. The MIT License for PDFMaster's own source is unchanged by a change to these terms.
+
+10. Mobile reader
+
+The mobile reader is the same product family. It does not include PyMuPDF, Ghostscript, or Tesseract. It uses PDFium through pdfrx. Its notices are in the reader's Legal screen. The privacy notice in PRIVACY.txt covers the reader, including the recent list stored on the device and the share sheet.
+
+11. Questions
+
+Questions about these terms can be sent through https://github.com/Remo-Consultants/pdfmaster/issues.
