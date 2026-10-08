@@ -71,7 +71,7 @@ This structure is how you keep a ribbon-heavy app maintainable as features accum
 
 We ship **complete slices**, not infinite previews. Version 0.7 adds compare and PDF/A inspection because those are daily desktop tasks that should not require a subscription or a server.
 
-What we have **not** promised: mandatory cloud sync, social sharing, or AI that sends your document to a third party. When cloud or signature features arrive, they will be **opt-in**, explicit, and secondary to the offline core.
+What we do **not** add: cloud sync, social sharing, or AI that sends your document to a third party. Files stay on the desk.
 
 ---
 

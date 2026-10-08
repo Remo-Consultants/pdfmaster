@@ -85,7 +85,7 @@ PDFMaster is composed like a commercial desktop product — not a thin wrapper a
 | **Organize** | Reorder (drag or buttons), reverse, merge PDFs into the open file, insert blank, duplicate, delete, rotate, import pages |
 | **Print / export** | System print + preview; PNG/JPEG export up to 600 dpi |
 | **Review** | Sidebar mode: Search (`Ctrl+F`), OCR, batch, **Compare**, **PDF/A** (plus Tools menu) |
-| **Search & OCR** | Document search (`Ctrl+F`); OCR scanned pages (`Ctrl+Shift+T`); text extract (`Ctrl+T`) |
+| **Search & OCR** | Document search (`Ctrl+F`); OCR (`Ctrl+Shift+T`) writes a searchable text layer, can straighten and rotate scans, and can save a PDF/A-2 copy; text extract (`Ctrl+T`) |
 | **Security** | AES password protect / remove; security info; place signature fields |
 | **Batch** | Compress, extract, convert a folder of PDFs |
 | **Compare** | Page-by-page text diff; optional rendered-page similarity |
@@ -242,7 +242,7 @@ Headless GUI tests use `pytest-qt` with a 60s timeout and auto-cancelled dialogs
 | Python (source) | 3.10 | 3.11–3.13 |
 | RAM | 4 GB | 8 GB+ |
 
-OCR is optional: install [Tesseract](https://github.com/tesseract-ocr/tesseract) or `easyocr` if you use **Tools → OCR**.
+OCR is optional: install [Tesseract](https://github.com/tesseract-ocr/tesseract) or `easyocr` for the searchable text layer. A PDF/A-2 copy also needs [Ghostscript](https://ghostscript.com/) (`gswin64c` on PATH).
 
 ---
 
@@ -260,11 +260,20 @@ OCR is optional: install [Tesseract](https://github.com/tesseract-ocr/tesseract)
 | Review ribbon + visible stamps (0.8.1) | Shipped (0.8.1) |
 | Organize merge + drag reorder (0.8.2) | Shipped (0.8.2) |
 | Sidebar shell + context tool rail | Shipped (0.9.0) |
-| Cloud *opt-in*, PDF/A conversion | Ideas (later) |
+| Searchable OCR, deskew, rotate, PDF/A-2 export | Shipped |
 
 ---
 
 ## Changelog (recent)
+
+### Searchable OCR — 2026-10-08
+
+In-app OCR job. No OCRmyPDF process, and no cloud sync on the roadmap.
+
+- **Added:** Invisible searchable text layer on the open document (skip pages that already have text)
+- **Added:** Straighten crooked scans and turn sideways pages upright
+- **Added:** Optional PDF/A-2 export through Ghostscript
+- **Removed:** Planned opt-in cloud from the roadmap
 
 ### 0.9.0 — 2026-09-14
 

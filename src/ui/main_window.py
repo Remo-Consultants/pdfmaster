@@ -487,7 +487,9 @@ class MainWindow(QMainWindow):
 
             self.ocr_action = QAction("&OCR Scanned Pages...", self)
             self.ocr_action.setShortcut(QKeySequence(SHORTCUTS["ocr"]))
-            self.ocr_action.setStatusTip("Extract text from scanned pages using OCR")
+            self.ocr_action.setStatusTip(
+                "OCR scanned pages: searchable text, straighten, rotate, optional PDF/A"
+            )
             self.ocr_action.triggered.connect(self.open_ocr_dialog)
             tools_menu.addAction(self.ocr_action)
 
